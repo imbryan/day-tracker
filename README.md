@@ -1,5 +1,5 @@
 # Day Tracker
-This is a desktop program designed to help you track daily statistics. Requires python to be installed. Run 'python interface.py' to execute this script.
+This is a desktop program designed to help you track daily statistics. Requires python to be installed. Run **python interface.py** to execute this script.
 
 ## Features
 ### Current
