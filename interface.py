@@ -63,12 +63,18 @@ def main():
                         print("Today's entry for {} has been updated".format(cat.name.capitalize()))
                     conn.commit()
             elif choose == 'v':
+                date = input("[t]oday or [o]ther day: ").lower()
+                if date == 't':
+                    date = datetime.datetime.today()
+                elif date == 'o':
+                    raw_date = input("Enter date as YYYY-MM-DD: ")
+                    date = datetime.date(year=int(raw_date[0:4]), month=int(raw_date[5:7].strip("0")), day=int(raw_date[8:10]))
+
                 cat_choice = input("View data for which category? ").lower()
                 cat_type = read_database(conn, "type", "Categories", "WHERE name = \"{}\"".format(cat_choice), "string", "one")
-                date = datetime.datetime.now()
                 entry_data = read_database(conn, "data", "Entries", "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(cat_choice, date.year, date.month, date.day), cat_type, "one")
 
-                if entry_data is not None: print("Today's entry for {} is {}".format(cat_choice.capitalize(), entry_data))
+                if entry_data is not None: print("{}'s entry for {} is {}".format(date.strftime('%Y-%m-%d'), cat_choice.capitalize(), entry_data))
 
             elif choose == 'q':
                 print('Goodbye')
