@@ -56,7 +56,7 @@ def main():
 
                     date = datetime.datetime.now()
 
-                    if read_database(conn, "data", "Entries", "WHERE year = {} and month = {} and day = {}".format(date.year, date.month, date.day), "string", "one") is None:
+                    if read_database(conn, "data", "Entries", "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(cat.name, date.year, date.month, date.day), "string", "one") is None:
                         write_database(conn, "insert", "Entries", "category_name, year, month, day, data", "\"{}\", {}, {}, {}, \"{}\"".format(cat.name, date.year, date.month, date.day, entry_data))
                     else:
                         write_database(conn, "update", "Entries", "data = {}".format(entry_data), "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(cat.name, date.year, date.month, date.day))
