@@ -72,7 +72,7 @@ class Controller:
                           "In the upper text box, type in a \"category\" of data whose entry you would like to create or view.\n"
                           "The lower text box will be used to enter a corresponding data value (pressing \"Lookup\" above will make the lower box show any existing value)\n\n"
                           "You can enter any combination of Category and Data value, press \"Update\",\n"
-                          "and it will write (or override) the entry for the selected day."
+                          "and it will write (or overwrite) the entry for the selected day."
                                    )
 
 

@@ -29,6 +29,14 @@ class View(tk.Tk):
         self._make_extras()
 
     def main(self):
+        width = self.winfo_reqwidth()
+        height = self.winfo_reqheight()
+
+        right = int(self.winfo_screenwidth()/2 - width/2)
+        down = int(self.winfo_screenheight()/2 - height/2)
+
+        self.geometry(f'+{right}+{down}')
+
         self.mainloop()
 
     def _make_main_frame(self):
