@@ -62,7 +62,7 @@ class Controller:
                                           self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day))
 
                 self.db.conn.commit()
-                self.view.popup_window("Success", "Entry has been updated")
+                self.view.popup_window("Success", f"Entry has been updated to {self.view.val_var.get()}")
             except Exception as e: self.view.popup_window("Error", e)
 
     def message_button_click(self, caption):
