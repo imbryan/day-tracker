@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk  # More native looking widgets
+from tkinter.messagebox import showinfo
 import datetime
 
 
@@ -13,14 +14,19 @@ class View(tk.Tk):
         self.controller = controller
 
         self.title("Day Tracker")
-        self.value_var = tk.StringVar()  # Use this to store input
 
         self.date = datetime.datetime.now()
         self.current_day = tk.StringVar()
         self.current_day.set(f'{self.date.month} / {self.date.day} / {self.date.year}')
 
+        # make this better
+        self.cat_var = tk.StringVar()
+        self.val_var = tk.StringVar()
+
         self._make_main_frame()
         self._make_buttons()
+        self._make_entries()
+        self._make_extras()
 
     def main(self):
         self.mainloop()
@@ -55,7 +61,7 @@ class View(tk.Tk):
                                      )
         prev_year_button.pack(expand=True)
 
-        current_day_label = ttk.Label(middle_frame, textvariable=self.current_day)
+        current_day_label = ttk.Label(middle_frame, font=(None, 15), textvariable=self.current_day)
         current_day_label.pack(expand=True, padx=(self.PAD, self.PAD))
 
         caption_next = "Next Day"
@@ -87,8 +93,51 @@ class View(tk.Tk):
         right_frame.pack(side="left")
         frame.pack(side="top")
 
-    def _make_entry(self):
-        entry = ttk.Entry(self.main_frame, justify='center', textvariable=self.value_var)
-        entry.pack()
+    def _make_entries(self):
+        frame = ttk.Frame(self.main_frame)
+        top_frame = ttk.Frame(frame)
+        bottom_frame = ttk.Frame(frame)
+
+        cat_label = ttk.Label(top_frame, text="Lookup category", width=17, justify="center")
+        cat_label.pack(side="left",expand=True, padx=(self.PAD, self.PAD))
+
+        cat_entry = ttk.Entry(top_frame, textvariable=self.cat_var)
+        cat_entry.pack(side="left",expand=True, padx=(self.PAD, self.PAD))
+
+        caption_lookup = "Lookup"
+        lookup_button = ttk.Button(top_frame, text=caption_lookup, command =
+        (lambda button=caption_lookup: self.controller.entry_button_click(caption_lookup))
+                                   )
+        lookup_button.pack(side="left",expand=True)
+
+        val_label = ttk.Label(bottom_frame, text="View/change value", width=17, justify="center")
+        val_label.pack(side="left", expand=True, padx=(self.PAD, self.PAD))
+
+        val_entry = ttk.Entry(bottom_frame, textvariable=self.val_var)
+        val_entry.pack(side="left", padx=(self.PAD, self.PAD))
+
+        caption_update = "Update"
+        update_button = ttk.Button(bottom_frame, text=caption_update, command=
+        (lambda button=caption_update: self.controller.entry_button_click(caption_update))
+                                   )
+        update_button.pack(side="left", expand=True)
+
+        top_frame.pack(side="top")
+        bottom_frame.pack(side="bottom")
+        frame.pack(side="top", pady=(self.PAD,self.PAD))
+
+    def _make_extras(self):
+        frame = ttk.Frame(self.main_frame)
+
+        caption_help = "Help"
+        help_button = ttk.Button(frame, text=caption_help, command=
+        (lambda button=caption_help: self.controller.message_button_click(caption_help)))
+        help_button.pack(side="left", expand=True)
+
+        frame.pack(side="top")
+
+    @staticmethod
+    def popup_window(title, message):
+        showinfo(title, message)
 
 

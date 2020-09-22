@@ -50,3 +50,9 @@ class Database:
             statement = """INSERT OR IGNORE INTO {}({}) VALUES({});""".format(table, args1, args2)
 
         c.execute(statement)
+
+    def count(self, connect, table):
+        c = connect.cursor()
+        statement = """SELECT COUNT(*) FROM {};""".format(table)
+        c.execute(statement)
+        return c.fetchone()[0]
