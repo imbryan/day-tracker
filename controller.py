@@ -39,23 +39,24 @@ class Controller:
 
     def entry_button_click(self,caption):
         if caption == "Lookup":
-            data = self.db.read_database(self.db.conn, "data", "Entries",
-                                         "WHERE category_name = \"{}\" and year = {} and month = {} {}".format(
-                                             self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month,
-                                             'and day = ' + str(self.view.date.day)), "string",
-                                         "one")
+            if self.view.cat_var.get().lower() is not '':
+                data = self.db.read_database(self.db.conn, "data", "Entries",
+                                             "WHERE category_name = \"{}\" and year = {} and month = {} {}".format(
+                                                 self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month,
+                                                 'and day = ' + str(self.view.date.day)), "string",
+                                             "one")
 
-            if data is None:
-                self.view.popup_window("Alert", "No value found for this day")
-            else:
-                self.view.val_var.set(data[0])
+                if data is None:
+                    self.view.popup_window("Alert", "No value found for this day")
+                else:
+                    self.view.val_var.set(data[0])
 
             try:
                 if self.db.exists(self.db.conn, "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\""):
                     self.view.remind_var.set(1)
-                else:
-                    self.view.remind_var.set(0)
-            except Exception as e: print(e)
+
+            except Exception as e:
+                self.view.remind_var.set(0)
         elif caption == "Update":
             try:
                 if self.view.cat_var.get() is not '' and self.view.val_var.get() is not '':
