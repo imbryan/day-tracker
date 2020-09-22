@@ -74,6 +74,29 @@ class Controller:
                           "You can enter any combination of Category and Data value, press \"Update\",\n"
                           "and it will write (or overwrite) the entry for the selected day."
                                    )
+        elif caption=="Sum values (month)":
+            try:
+                data_set = self.db.read_database(self.db.conn, "data", "Entries",
+                                      f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}", "int", "all")
+
+                sum = 0
+                for data in data_set:
+                    sum+=int(data[0])
+
+                self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.month}-{self.view.date.year}:\n\n{sum}")
+            except Exception as e: self.view.popup_window("Error", e)
+        elif caption=="Sum values (year)":
+            try:
+                data_set = self.db.read_database(self.db.conn, "data", "Entries",
+                                      f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}", "int", "all")
+
+                sum = 0
+                for data in data_set:
+                    sum+=int(data[0])
+
+                self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.year}:\n\n{sum}")
+            except Exception as e: self.view.popup_window("Error", e)
+            pass
 
 
 if __name__ == '__main__':

@@ -131,17 +131,36 @@ class View(tk.Tk):
         update_button.pack(side="left", expand=True)
 
         top_frame.pack(side="top")
-        bottom_frame.pack(side="bottom")
+        bottom_frame.pack(side="top")
         frame.pack(side="top", pady=(self.PAD,self.PAD))
 
     def _make_extras(self):
         frame = ttk.Frame(self.main_frame)
 
-        caption_help = "Help"
-        help_button = ttk.Button(frame, text=caption_help, command=
-        (lambda button=caption_help: self.controller.message_button_click(caption_help)))
-        help_button.pack(side="left", expand=True)
+        top_frame = ttk.Frame(frame)
+        bottom_frame = ttk.Frame(frame)
 
+        caption_sum_month = "Sum values (month)"
+        sum_month_button = ttk.Button(top_frame, text=caption_sum_month, command=
+        (lambda button=caption_sum_month: self.controller.message_button_click(caption_sum_month)))
+        sum_month_button.pack(side="left", expand=True, padx=self.PAD/2)
+
+        caption_sum_year = "Sum values (year)"
+        sum_year_button = ttk.Button(top_frame, text=caption_sum_year, command=
+        (lambda button=caption_sum_year: self.controller.message_button_click(caption_sum_year)))
+        sum_year_button.pack(side="left", expand=True)
+
+        caption_help = "Help"
+        help_button = ttk.Button(bottom_frame, text=caption_help, command=
+        (lambda button=caption_help: self.controller.message_button_click(caption_help)))
+        help_button.pack(side="left", expand=True, padx=self.PAD, pady=(self.PAD,))
+
+        caption_exit = "Exit"
+        exit_button = ttk.Button(bottom_frame, text=caption_exit, command=self.destroy)
+        exit_button.pack(side="left", expand=True, pady=(self.PAD,))
+
+        top_frame.pack(side="top")
+        bottom_frame.pack(side="top")
         frame.pack(side="top")
 
     @staticmethod
