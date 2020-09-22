@@ -180,34 +180,42 @@ class View(tk.Tk):
         frame = ttk.Frame(self.main_frame)
 
         top_frame = ttk.Frame(frame)
+        middle_frame = ttk.Frame(frame)
         bottom_frame = ttk.Frame(frame)
 
-        caption_remind = "Toggle reminder\nfor category"
+        caption_remind = "Toggle reminder for category"
         reminder_button = ttk.Checkbutton(top_frame, text=caption_remind, variable=self.remind_var, onvalue=1, offvalue=0, command=
         (lambda checkbutton=caption_remind: self.controller.message_button_click(caption_remind))
                           )
         reminder_button.pack(side="left", expand=True, padx=self.PAD/2)
 
+        caption_categories = "List of created categories"
+        categories_button = ttk.Button(top_frame, text=caption_categories, command=
+        (lambda button=caption_categories: self.controller.message_button_click(caption_categories))
+                                       )
+        categories_button.pack(side="left", expand=True, padx=self.PAD/2)
+
         caption_sum_month = "Sum values (month)"
-        sum_month_button = ttk.Button(top_frame, text=caption_sum_month, command=
+        sum_month_button = ttk.Button(middle_frame, text=caption_sum_month, command=
         (lambda button=caption_sum_month: self.controller.message_button_click(caption_sum_month)))
-        sum_month_button.pack(side="left", expand=True, padx=self.PAD/2)
+        sum_month_button.pack(side="left", expand=True, padx=self.PAD/2, pady=(self.PAD,))
 
         caption_sum_year = "Sum values (year)"
-        sum_year_button = ttk.Button(top_frame, text=caption_sum_year, command=
+        sum_year_button = ttk.Button(middle_frame, text=caption_sum_year, command=
         (lambda button=caption_sum_year: self.controller.message_button_click(caption_sum_year)))
-        sum_year_button.pack(side="left", expand=True)
+        sum_year_button.pack(side="left", expand=True, pady=(self.PAD,))
 
         caption_help = "Help"
         help_button = ttk.Button(bottom_frame, text=caption_help, command=
         (lambda button=caption_help: self.controller.message_button_click(caption_help)))
-        help_button.pack(side="left", expand=True, padx=self.PAD, pady=(self.PAD,))
+        help_button.pack(side="left", expand=True, padx=self.PAD)
 
         caption_exit = "Exit"
         exit_button = ttk.Button(bottom_frame, text=caption_exit, command=self.destroy)
-        exit_button.pack(side="left", expand=True, pady=(self.PAD,))
+        exit_button.pack(side="left", expand=True)
 
         top_frame.pack(side="top")
+        middle_frame.pack(side="top")
         bottom_frame.pack(side="top")
         frame.pack(side="top")
 

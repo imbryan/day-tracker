@@ -61,15 +61,20 @@ class Controller:
             try:
                 if self.view.cat_var.get() is not '' and self.view.val_var.get() is not '':
                     if self.db.read_database(self.db.conn, "data", "Entries",
-                                        "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(
-                                                self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day), "string", "one") is None:
-                        self.db.write_database(self.db.conn, "insert", "Entries", "category_name, year, month, day, data",
-                                          "\"{}\", {}, {}, {}, \"{}\"".format(self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day,
-                                                                              self.view.val_var.get().lower()))
+                                            "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(
+                                                    self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day), "string", "one") is None:
+                         self.db.write_database(self.db.conn, "insert", "Entries", "category_name, year, month, day, data",
+                                              "\"{}\", {}, {}, {}, \"{}\"".format(self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day,
+                                                                                  self.view.val_var.get().lower()))
                     else:
                         self.db.write_database(self.db.conn, "update", "Entries", "data = {}".format(self.view.val_var.get().lower()),
                                           "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(
                                               self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day))
+
+                    cat_type = "string"
+                    if self.view.cat_var.get().isnumeric():
+                        cat_type = "float"
+                    self.db.write_database(self.db.conn, "insert","Categories","name, type", f"\"{self.view.cat_var.get().lower()}\", \"{cat_type}\"")
 
                     self.db.conn.commit()
                     self.view.popup_window("Success", f"Entry has been updated to {self.view.val_var.get()}")
@@ -108,7 +113,7 @@ class Controller:
                 self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.year}:\n\n{sum}")
             except Exception as e: self.view.popup_window("Error", e)
             pass
-        elif caption == "Toggle reminder\nfor category":
+        elif caption == "Toggle reminder for category":
             boolean = self.view.remind_var.get()
             if boolean == 1 and self.view.cat_var.get().lower() is not '':
                 self.db.write_database(self.db.conn, "insert", "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\"")
@@ -117,6 +122,16 @@ class Controller:
                 self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",
                                        f"\"{self.view.cat_var.get().lower()}\"")
                 self.db.conn.commit()
+            elif boolean == 1 and self.view.cat_var.get().lower() is '':
+                self.view.remind_var.set(0)
+
+        elif caption == "List of created categories":
+            message = ''
+            cats = self.db.read_database(self.db.conn, "name", "Categories", None, "string", "all")
+            for cat in cats:
+                message+=cat[0]+'\n'
+
+            self.view.popup_window("Categories", message)
 
     def check_reminders(self):
         data_set = self.db.read_database(self.db.conn, "category_name", "Reminders", None, "string", "all")
