@@ -4,9 +4,8 @@ This is a desktop program designed to help you track daily statistics. Currently
 ## Features
 ### Current
  * Graphical user interface
- * ~~Ability to create "categories"~~ (under maintenance)
- * ~~Ability to create entries (under a category) for the current day~~ (under maintenance)
+ * Ability to create "category" & "data value" pairs for any given day
 
 ### To-do
- * Ability to modify day entries other than the current day
  * Generate graphs for given time spans
+ * Maybe make it easier to jump to non-adjacent days
