@@ -5,6 +5,7 @@ This is a desktop program designed to help you track daily statistics. Currently
 ### Current
  * Graphical user interface
  * Ability to create "category" & "data value" pairs for any given day
+ * Ability to sum (numerical) values for months and years
 
 ### To-do
  * Generate graphs for given time spans
