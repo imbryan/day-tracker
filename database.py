@@ -9,6 +9,7 @@ class Database:
 
         self.create_table(self.conn, "Categories", "id integer PRIMARY KEY, name text, type text, UNIQUE(name)")
         self.create_table(self.conn, "Entries", "id integer PRIMARY KEY, category_name text, year integer, month integer, day integer, data text")
+        self.create_table(self.conn, "Reminders", "id integer PRIMARY KEY, category_name text, UNIQUE(category_name)")
 
     def create_table(self, connect, table_name, args):
         if args is None: args = ""
@@ -48,11 +49,19 @@ class Database:
             statement = """UPDATE {} SET {} {};""".format(table, args1, args2)
         elif mode == "insert":
             statement = """INSERT OR IGNORE INTO {}({}) VALUES({});""".format(table, args1, args2)
+        elif mode == "delete":
+            statement = """DELETE FROM {} WHERE {} = {};""".format(table, args1, args2)
 
         c.execute(statement)
 
     def count(self, connect, table):
         c = connect.cursor()
         statement = """SELECT COUNT(*) FROM {};""".format(table)
+        c.execute(statement)
+        return c.fetchone()[0]
+
+    def exists(self, connect, table, key, value):
+        c = connect.cursor()
+        statement = """SELECT * FROM {} WHERE {} = {};""".format(table, key, value)
         c.execute(statement)
         return c.fetchone()[0]
