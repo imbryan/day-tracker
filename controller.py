@@ -31,7 +31,6 @@ class Controller:
         elif caption == "Today":
             self.view.date = datetime.now()
 
-        self.view.cat_var.set("")
         self.view.val_var.set("")
         self.view.remind_var.set(0)
 
