@@ -14,6 +14,7 @@ class Controller:
     def main(self):
         self.view.main()
 
+    # Buttons for navigating dates
     def on_nav_button_click(self, caption):
         if caption == "Previous Day":
             self.view.date -= timedelta(days=1)
@@ -37,8 +38,10 @@ class Controller:
         self.view.current_day.set(f'{self.view.date.month} / {self.view.date.day} / {self.view.date.year}')
         # print(f'{caption} has been pressed')
 
+    # Buttons for data manipulation
     def entry_button_click(self,caption):
         if caption == "Lookup":
+            # If there is a category typed in
             if self.view.cat_var.get().lower() is not '':
                 data = self.db.read_database(self.db.conn, "data", "Entries",
                                              "WHERE category_name = \"{}\" and year = {} and month = {} {}".format(
@@ -46,11 +49,13 @@ class Controller:
                                                  'and day = ' + str(self.view.date.day)), "string",
                                              "one")
 
-                if data is None:
+                if data is None:  # Empty entry
+                    self.view.val_var.set('')
                     self.view.popup_window("Alert", "No value found for this day")
-                else:
+                else:             # Entry exists
                     self.view.val_var.set(data[0])
 
+            # Pull reminder info for queried category
             try:
                 if self.db.exists(self.db.conn, "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\""):
                     self.view.remind_var.set(1)
@@ -59,6 +64,7 @@ class Controller:
                 self.view.remind_var.set(0)
         elif caption == "Update":
             try:
+                # If there is input
                 if self.view.cat_var.get() is not '' and self.view.val_var.get() is not '':
                     if self.db.read_database(self.db.conn, "data", "Entries",
                                             "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(
@@ -71,16 +77,19 @@ class Controller:
                                           "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(
                                               self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day))
 
+                    # Inserts category into database if it is novel
                     cat_type = "string"
                     if self.view.cat_var.get().isnumeric():
                         cat_type = "float"
                     self.db.write_database(self.db.conn, "insert","Categories","name, type", f"\"{self.view.cat_var.get().lower()}\", \"{cat_type}\"")
 
+                    # Updates entry
                     self.db.conn.commit()
                     self.view.popup_window("Success", f"Entry has been updated to {self.view.val_var.get()}")
                 else: raise Exception("Missing input in fields")
             except Exception as e: self.view.popup_window("Error", e)
 
+    # Extras buttons
     def message_button_click(self, caption):
         if caption=="Help":
             self.view.popup_window("Help",
@@ -133,6 +142,7 @@ class Controller:
 
             self.view.popup_window("Categories", message)
 
+    # Checks db for set reminders
     def check_reminders(self):
         data_set = self.db.read_database(self.db.conn, "category_name", "Reminders", None, "string", "all")
         list = []

@@ -22,7 +22,7 @@ class View(tk.Tk):
 
         self.remind_var = tk.IntVar()
 
-        # make this better
+        # Data manipulation variables
         self.cat_var = tk.StringVar()
         self.val_var = tk.StringVar()
 
@@ -46,6 +46,7 @@ class View(tk.Tk):
 
         self.mainloop()
 
+    # Method to trigger reminder for incomplete entries
     def remind(self, list):
         new_list = []
         for item in list:
@@ -86,6 +87,7 @@ class View(tk.Tk):
         # self.main_frame.pack_propagate(0)
         self.main_frame.pack(padx=self.PAD, pady=self.PAD)  # Put padding around main frame
 
+    # Buttons for navigating dates
     def _make_buttons(self):
         frame = ttk.Frame(self.main_frame)
 
@@ -93,6 +95,7 @@ class View(tk.Tk):
         middle_frame = ttk.Frame(frame)
         right_frame = ttk.Frame(frame)
 
+        # Left frame widgets
         caption_prev = "Previous Day"
         prev_day_button = ttk.Button(left_frame, text=caption_prev, width=self.BUTTON_WIDTH, command=
         (lambda button=caption_prev: self.controller.on_nav_button_click(caption_prev))
@@ -111,9 +114,17 @@ class View(tk.Tk):
                                      )
         prev_year_button.pack(expand=True)
 
+        # Middle frame widgets
         current_day_label = ttk.Label(middle_frame, font=(None, 15), textvariable=self.current_day)
         current_day_label.pack(expand=True, padx=(self.PAD, self.PAD))
 
+        caption_today = "Today"
+        today_button = ttk.Button(middle_frame, text=caption_today, command=
+        (lambda button=caption_today: self.controller.on_nav_button_click(caption_today))
+                                  )
+        today_button.pack(side="bottom", expand=True)
+
+        # Right frame widgets
         caption_next = "Next Day"
         next_day_button = ttk.Button(right_frame, text=caption_next, width=self.BUTTON_WIDTH,command=
         (lambda button=caption_next: self.controller.on_nav_button_click(caption_next))
@@ -132,22 +143,18 @@ class View(tk.Tk):
                                      )
         next_year_button.pack(expand=True)
 
-        caption_today = "Today"
-        today_button = ttk.Button(middle_frame, text=caption_today, command =
-        (lambda button=caption_today: self.controller.on_nav_button_click(caption_today))
-                                  )
-        today_button.pack(side="bottom",expand=True)
-
         left_frame.pack(side="left")
         middle_frame.pack(side="left")
         right_frame.pack(side="left")
         frame.pack(side="top")
 
+    # Buttons for data manipulation
     def _make_entries(self):
         frame = ttk.Frame(self.main_frame)
         top_frame = ttk.Frame(frame)
         bottom_frame = ttk.Frame(frame)
 
+        # Top frame widgets
         cat_label = ttk.Label(top_frame, text="Lookup category", width=17, justify="center")
         cat_label.pack(side="left",expand=True, padx=(self.PAD, self.PAD))
 
@@ -160,6 +167,7 @@ class View(tk.Tk):
                                    )
         lookup_button.pack(side="left",expand=True)
 
+        # Bottom frame widgets
         val_label = ttk.Label(bottom_frame, text="View/change value", width=17, justify="center")
         val_label.pack(side="left", expand=True, padx=(self.PAD, self.PAD))
 
@@ -176,6 +184,7 @@ class View(tk.Tk):
         bottom_frame.pack(side="top")
         frame.pack(side="top", pady=(self.PAD,self.PAD))
 
+    # Extras buttons
     def _make_extras(self):
         frame = ttk.Frame(self.main_frame)
 
@@ -183,6 +192,7 @@ class View(tk.Tk):
         middle_frame = ttk.Frame(frame)
         bottom_frame = ttk.Frame(frame)
 
+        # Top frame widgets
         caption_remind = "Toggle reminder for category"
         reminder_button = ttk.Checkbutton(top_frame, text=caption_remind, variable=self.remind_var, onvalue=1, offvalue=0, command=
         (lambda checkbutton=caption_remind: self.controller.message_button_click(caption_remind))
@@ -195,6 +205,7 @@ class View(tk.Tk):
                                        )
         categories_button.pack(side="left", expand=True, padx=self.PAD/2)
 
+        # Middle frame widgets
         caption_sum_month = "Sum values (month)"
         sum_month_button = ttk.Button(middle_frame, text=caption_sum_month, command=
         (lambda button=caption_sum_month: self.controller.message_button_click(caption_sum_month)))
@@ -205,6 +216,7 @@ class View(tk.Tk):
         (lambda button=caption_sum_year: self.controller.message_button_click(caption_sum_year)))
         sum_year_button.pack(side="left", expand=True, pady=(self.PAD,))
 
+        # Bottom frame widgets
         caption_help = "Help"
         help_button = ttk.Button(bottom_frame, text=caption_help, command=
         (lambda button=caption_help: self.controller.message_button_click(caption_help)))
