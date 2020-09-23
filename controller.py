@@ -100,28 +100,29 @@ class Controller:
                           "and it will write (or overwrite) the entry for the selected day."
                                    )
         elif caption=="Sum values (month)":
-            try:
-                data_set = self.db.read_database(self.db.conn, "data", "Entries",
-                                      f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}", "int", "all")
+            if self.view.cat_var.get() is not '':  # if there is valid input
+                try:
+                    data_set = self.db.read_database(self.db.conn, "data", "Entries",
+                                          f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}", "int", "all")
 
-                sum = 0
-                for data in data_set:
-                    sum+=int(data[0])
+                    sum = 0
+                    for data in data_set:
+                        sum+=int(data[0])
 
-                self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.month}-{self.view.date.year}:\n\n{sum}")
-            except Exception as e: self.view.popup_window("Error", e)
+                    self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.month}-{self.view.date.year}:\n\n{sum}")
+                except Exception as e: self.view.popup_window("Error", e)
         elif caption=="Sum values (year)":
-            try:
-                data_set = self.db.read_database(self.db.conn, "data", "Entries",
-                                      f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}", "int", "all")
+            if self.view.cat_var.get() is not '':  # if there is valid input
+                try:
+                    data_set = self.db.read_database(self.db.conn, "data", "Entries",
+                                          f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}", "int", "all")
 
-                sum = 0
-                for data in data_set:
-                    sum+=int(data[0])
+                    sum = 0
+                    for data in data_set:
+                        sum+=int(data[0])
 
-                self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.year}:\n\n{sum}")
-            except Exception as e: self.view.popup_window("Error", e)
-            pass
+                    self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.year}:\n\n{sum}")
+                except Exception as e: self.view.popup_window("Error", e)
         elif caption == "Toggle reminder for category":
             boolean = self.view.remind_var.get()
             if boolean == 1 and self.view.cat_var.get().lower() is not '':
