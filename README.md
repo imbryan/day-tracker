@@ -9,6 +9,7 @@ This is a desktop program designed to help you track daily statistics. Currently
  * Ability to set runtime reminders for filling out certain category entries
 
 ### To-do
+ * Ability to add description to a category
  * Ability to create backups
  * Generate graphs for given time spans
  * Maybe make it easier to jump to non-adjacent days
