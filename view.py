@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk  # More native looking widgets
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import showinfo, askyesno
 import datetime
 
 
@@ -221,6 +221,12 @@ class View(tk.Tk):
                                        )
         categories_button.pack(side="left", expand=True, padx=self.PAD/2)
 
+        caption_delete = "Delete category"
+        delete_button = ttk.Button(top_frame, text=caption_delete, command=
+        (lambda button=caption_delete: self.delete_cat())
+                                   )
+        delete_button.pack(side="left", expand=True, padx=self.PAD/2)
+
         # Middle frame widgets
         caption_sum_month = "Sum values (month)"
         sum_month_button = ttk.Button(middle_frame, text=caption_sum_month, command=
@@ -250,3 +256,23 @@ class View(tk.Tk):
     @staticmethod
     def popup_window(title, message):
         showinfo(title, message)
+
+    def delete_cat(self):
+        cat = self.cat_var.get().lower()
+        response = None
+        if cat is not "":
+            response = askyesno("WARNING",
+                 f"Are you sure you want to delete \"{cat}\"?\nALL of its entries will be permanently deleted.")
+        if response:
+            self.db.write_database(self.db.conn, "delete", "Entries", "category_name",
+                                   f"\"{cat}\"")
+            self.db.write_database(self.db.conn, "delete", "Categories", "name",
+                                   f"\"{cat}\"")
+            self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",
+                                   f"\"{cat}\"")
+            self.db.conn.commit()
+
+            self.cat_var.set("")
+            self.val_var.set("")
+            self.remind_var.set(0)
+            self.des_var.set("")
