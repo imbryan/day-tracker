@@ -31,8 +31,20 @@ class Controller:
         elif caption == "Today":
             self.view.date = datetime.now()
 
-        self.view.val_var.set("")
-        self.view.remind_var.set(0)
+        val = self.get_value(self.view.cat_var.get().lower(), self.view.date)
+        if val is not None:
+            self.view.val_var.set(val)
+        else:
+            self.view.val_var.set("")
+        if self.get_reminder_status(self.view.cat_var.get().lower()) is not None:
+            self.view.remind_var.set(1)
+        else:
+            self.view.remind_var.set(0)
+        des = self.get_description(self.view.cat_var.get().lower())
+        if des is not None:
+            self.view.des_var.set(des)
+        else:
+            self.view.des_var.set("")
 
         self.view.current_day.set(f'{self.view.date.month} / {self.view.date.day} / {self.view.date.year}')
         # print(f'{caption} has been pressed')
@@ -53,6 +65,7 @@ class Controller:
                     self.view.popup_window("Alert", "No value found for this day")
                 else:             # Entry exists
                     self.view.val_var.set(data[0])
+                    self.view.des_var.set(self.get_description(self.view.cat_var.get().lower()))
 
             # Pull reminder info for queried category
             try:
@@ -87,13 +100,17 @@ class Controller:
                     self.view.popup_window("Success", f"Entry has been updated to {self.view.val_var.get()}")
                 else: raise Exception("Missing input in fields")
             except Exception as e: self.view.popup_window("Error", e)
+        elif caption == "Set":
+            if self.view.cat_var.get() is not '':
+                self.set_description(self.view.des_var.get(), self.view.cat_var.get().lower())
+                self.view.popup_window("Alert", f"Category description has been set to\n\"{self.view.des_var.get()}\"")
 
     # Extras buttons
     def message_button_click(self, caption):
         if caption=="Help":
             self.view.popup_window("Help",
                           "This program shows you one day's entry at a time.\n\n"
-                          "In the upper text box, type in a \"category\" of data whose entry you would like to create or view.\n"
+                          "In the middle text box, type in a \"category\" of data whose entry you would like to create or view.\n"
                           "The lower text box will be used to enter a corresponding data value (pressing \"Lookup\" above will make the lower box show any existing value)\n\n"
                           "You can enter any combination of Category and Data value, press \"Update\",\n"
                           "and it will write (or overwrite) the entry for the selected day."
@@ -142,6 +159,12 @@ class Controller:
 
             self.view.popup_window("Categories", message)
 
+    # Get value for a category
+    def get_value(self, cat, date):
+        data = self.db.read_database(self.db.conn, "data", "Entries", f"WHERE category_name = \"{cat}\" and year = {date.year} and month = {date.month} and day = {date.day}", "string", "one")
+
+        return data
+
     # Checks db for set reminders
     def check_reminders(self):
         data_set = self.db.read_database(self.db.conn, "category_name", "Reminders", None, "string", "all")
@@ -155,6 +178,23 @@ class Controller:
             return None
 
         return list
+
+    # Get reminder status for a category
+    def get_reminder_status(self, cat):
+        data = self.db.read_database(self.db.conn, "id", "Reminders", f"WHERE category_name = \"{cat}\"", "int", "one")
+
+        return data
+
+    # Get description from db
+    def get_description(self, cat):
+        data = self.db.read_database(self.db.conn, "description", "Categories", f"WHERE name = \"{cat}\"", "string", "one")
+
+        return data
+
+    # Set description to db
+    def set_description(self, desc, cat):
+        self.db.write_database(self.db.conn, "update", "Categories", f"description = \"{desc}\"", f"WHERE name = \"{cat}\"")
+        self.db.conn.commit()
 
 
 if __name__ == '__main__':

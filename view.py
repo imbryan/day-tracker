@@ -25,6 +25,7 @@ class View(tk.Tk):
         # Data manipulation variables
         self.cat_var = tk.StringVar()
         self.val_var = tk.StringVar()
+        self.des_var = tk.StringVar()
 
         self.reminders = self.controller.check_reminders()
 
@@ -153,6 +154,20 @@ class View(tk.Tk):
         frame = ttk.Frame(self.main_frame)
         top_frame = ttk.Frame(frame)
         bottom_frame = ttk.Frame(frame)
+        des_frame = ttk.Frame(frame)
+
+        # Description frame widgets
+        des_label = ttk.Label(des_frame, text="Category description", width=20, justify="center")
+        des_label.pack(side="left", expand=True, padx=(0, self.PAD/5))
+
+        des_entry = ttk.Entry(des_frame, textvariable=self.des_var)
+        des_entry.pack(side="left", padx=(self.PAD, self.PAD))
+
+        caption_des = "Set"
+        des_button = ttk.Button(des_frame, text=caption_des, command =
+        (lambda button=caption_des: self.controller.entry_button_click(caption_des))
+                                )
+        des_button.pack(side="left",expand=True)
 
         # Top frame widgets
         cat_label = ttk.Label(top_frame, text="Lookup category", width=17, justify="center")
@@ -180,7 +195,8 @@ class View(tk.Tk):
                                    )
         update_button.pack(side="left", expand=True)
 
-        top_frame.pack(side="top")
+        des_frame.pack(side="top", pady=(0,self.PAD/2))
+        top_frame.pack(side="top", pady=(0,self.PAD/4))
         bottom_frame.pack(side="top")
         frame.pack(side="top", pady=(self.PAD,self.PAD))
 
