@@ -7,7 +7,7 @@ class Database:
         self.database = "tracker.db"
         self.conn = lite.connect(self.database)
 
-        self.create_table(self.conn, "Categories", "id integer PRIMARY KEY, name text, type text, UNIQUE(name)")
+        self.create_table(self.conn, "Categories", "id integer PRIMARY KEY, name text, type text, description text, UNIQUE(name)")
         self.create_table(self.conn, "Entries", "id integer PRIMARY KEY, category_name text, year integer, month integer, day integer, data text")
         self.create_table(self.conn, "Reminders", "id integer PRIMARY KEY, category_name text, UNIQUE(category_name)")
 

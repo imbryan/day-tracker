@@ -80,7 +80,7 @@ class Controller:
                     cat_type = "string"
                     if self.view.cat_var.get().isnumeric():
                         cat_type = "float"
-                    self.db.write_database(self.db.conn, "insert","Categories","name, type", f"\"{self.view.cat_var.get().lower()}\", \"{cat_type}\"")
+                    self.db.write_database(self.db.conn, "insert","Categories","name, type, description", f"\"{self.view.cat_var.get().lower()}\", \"{cat_type}\", \"\"")
 
                     # Updates entry
                     self.db.conn.commit()
