@@ -63,7 +63,7 @@ class View(tk.Tk):
                 top.wm_geometry("250x175")
                 top.title("Reminder")
 
-                msg = "You need to fill in today's values for:\n\n"
+                msg = "You need to fill in this day's values for:\n\n"
 
                 for item in new_list:
                     msg+=(item+"\n")
@@ -74,7 +74,10 @@ class View(tk.Tk):
                 button = tk.Button(top, text="Dismiss", pady=(self.PAD), command=lambda: self.destroy_top(top))
                 button.pack(expand=True)
 
+                print(new_list[0])
                 self.cat_var.set(new_list[0])
+                self.des_var.set(self.controller.get_description(new_list[0]))
+                self.remind_var.set(1)
 
                 top.lift(self)
         except: pass
@@ -117,13 +120,20 @@ class View(tk.Tk):
 
         # Middle frame widgets
         current_day_label = ttk.Label(middle_frame, font=(None, 15), textvariable=self.current_day)
-        current_day_label.pack(expand=True, padx=(self.PAD, self.PAD))
+        current_day_label.pack(expand=True, side="top", padx=(self.PAD, self.PAD))
 
         caption_today = "Today"
         today_button = ttk.Button(middle_frame, text=caption_today, command=
         (lambda button=caption_today: self.controller.on_nav_button_click(caption_today))
                                   )
-        today_button.pack(side="bottom", expand=True)
+        today_button.pack(side="top", expand=True)
+
+        # Reset button
+        caption_reset = "Reset form"
+        reset_button = ttk.Button(middle_frame, text=caption_reset, command=
+        (lambda button=caption_reset: self.controller.on_nav_button_click(caption_reset))
+                                  )
+        reset_button.pack(side="top", expand=True)
 
         # Right frame widgets
         caption_next = "Next Day"
@@ -214,6 +224,12 @@ class View(tk.Tk):
         (lambda checkbutton=caption_remind: self.controller.message_button_click(caption_remind))
                           )
         reminder_button.pack(side="left", expand=True, padx=self.PAD/2)
+
+        caption_check_remind = "Check reminders"
+        check_remind_button = ttk.Button(top_frame, text=caption_check_remind, command=
+        (lambda button=caption_check_remind: self.remind(self.controller.check_reminders()))
+                                         )
+        check_remind_button.pack(side="left", expand=True, padx=self.PAD/2)
 
         caption_categories = "List of created categories"
         categories_button = ttk.Button(top_frame, text=caption_categories, command=

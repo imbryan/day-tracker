@@ -30,6 +30,12 @@ class Controller:
             self.view.date += relativedelta.relativedelta(years=1)
         elif caption == "Today":
             self.view.date = datetime.now()
+        elif caption == "Reset form":
+            self.view.cat_var.set("")
+            self.view.val_var.set("")
+            self.view.des_var.set("")
+            self.view.remind_var.set(0)
+            pass
 
         val = self.get_value(self.view.cat_var.get().lower(), self.view.date)
         if val is not None:
