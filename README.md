@@ -16,3 +16,6 @@ This is a desktop program designed to help you track daily statistics. Currently
  * Ability to create backups
  * Generate graphs for given time spans
  * Maybe make it easier to jump to non-adjacent days
+
+## Known issues
+ * Float values throw an exception when being read

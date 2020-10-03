@@ -157,13 +157,22 @@ class Controller:
             elif boolean == 1 and self.view.cat_var.get().lower() is '':
                 self.view.remind_var.set(0)
 
-        elif caption == "List of created categories":
+        elif caption == "List of categories":
             message = ''
             cats = self.db.read_database(self.db.conn, "name", "Categories", None, "string", "all")
             for cat in cats:
                 message+=cat[0]+'\n'
 
             self.view.popup_window("Categories", message)
+        elif caption == "Entries for this day":
+            message = ''
+            entries = self.db.read_database(self.db.conn, "category_name, data", "Entries",
+                                            f"WHERE year = {self.view.date.year} and month = {self.view.date.month} and day = {self.view.date.day}",
+                                            "string", "all")
+            for name, data in entries:
+                message+=f"{name}: {data}\n"
+
+            self.view.popup_window("Entries for this day", message)
 
     # Get value for a category
     def get_value(self, cat, date):

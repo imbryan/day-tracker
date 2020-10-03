@@ -74,7 +74,6 @@ class View(tk.Tk):
                 button = tk.Button(top, text="Dismiss", pady=(self.PAD), command=lambda: self.destroy_top(top))
                 button.pack(expand=True)
 
-                print(new_list[0])
                 self.cat_var.set(new_list[0])
                 self.des_var.set(self.controller.get_description(new_list[0]))
                 self.remind_var.set(1)
@@ -214,59 +213,70 @@ class View(tk.Tk):
     def _make_extras(self):
         frame = ttk.Frame(self.main_frame)
 
+        top_top_frame = ttk.Frame(frame)
         top_frame = ttk.Frame(frame)
         middle_frame = ttk.Frame(frame)
         bottom_frame = ttk.Frame(frame)
 
-        # Top frame widgets
-        caption_remind = "Toggle reminder for category"
-        reminder_button = ttk.Checkbutton(top_frame, text=caption_remind, variable=self.remind_var, onvalue=1, offvalue=0, command=
-        (lambda checkbutton=caption_remind: self.controller.message_button_click(caption_remind))
-                          )
-        reminder_button.pack(side="left", expand=True, padx=self.PAD/2)
+        # Top top frame widgets
+        caption_entries = "Entries for this day"
+        entries_button = ttk.Button(top_top_frame, text=caption_entries, command=
+        (lambda button=caption_entries: self.controller.message_button_click(caption_entries))
+                                    )
+        entries_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
         caption_check_remind = "Check reminders"
-        check_remind_button = ttk.Button(top_frame, text=caption_check_remind, command=
+        check_remind_button = ttk.Button(top_top_frame, text=caption_check_remind, command=
         (lambda button=caption_check_remind: self.remind(self.controller.check_reminders()))
                                          )
-        check_remind_button.pack(side="left", expand=True, padx=self.PAD/2)
+        check_remind_button.pack(side="left", expand=True)
 
-        caption_categories = "List of created categories"
+        # Top frame widgets
+        caption_categories = "List of categories"
         categories_button = ttk.Button(top_frame, text=caption_categories, command=
         (lambda button=caption_categories: self.controller.message_button_click(caption_categories))
                                        )
-        categories_button.pack(side="left", expand=True, padx=self.PAD/2)
+        categories_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
         caption_delete = "Delete category"
         delete_button = ttk.Button(top_frame, text=caption_delete, command=
         (lambda button=caption_delete: self.delete_cat())
                                    )
-        delete_button.pack(side="left", expand=True, padx=self.PAD/2)
+        delete_button.pack(side="left", expand=True)
 
         # Middle frame widgets
         caption_sum_month = "Sum values (month)"
         sum_month_button = ttk.Button(middle_frame, text=caption_sum_month, command=
         (lambda button=caption_sum_month: self.controller.message_button_click(caption_sum_month)))
-        sum_month_button.pack(side="left", expand=True, padx=self.PAD/2, pady=(self.PAD,))
+        sum_month_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
         caption_sum_year = "Sum values (year)"
         sum_year_button = ttk.Button(middle_frame, text=caption_sum_year, command=
         (lambda button=caption_sum_year: self.controller.message_button_click(caption_sum_year)))
-        sum_year_button.pack(side="left", expand=True, pady=(self.PAD,))
+        sum_year_button.pack(side="left", expand=True)
 
         # Bottom frame widgets
         caption_help = "Help"
         help_button = ttk.Button(bottom_frame, text=caption_help, command=
         (lambda button=caption_help: self.controller.message_button_click(caption_help)))
-        help_button.pack(side="left", expand=True, padx=self.PAD)
+        help_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
         caption_exit = "Exit"
         exit_button = ttk.Button(bottom_frame, text=caption_exit, command=self.destroy)
         exit_button.pack(side="left", expand=True)
 
-        top_frame.pack(side="top")
-        middle_frame.pack(side="top")
-        bottom_frame.pack(side="top")
+        caption_remind = "Toggle reminder for category"
+        reminder_button = ttk.Checkbutton(frame, text=caption_remind, variable=self.remind_var, onvalue=1,
+                                          offvalue=0, command=
+                                          (lambda checkbutton=caption_remind: self.controller.message_button_click(
+                                              caption_remind))
+                                          )
+        reminder_button.pack(side="top", expand=True, pady=(0,self.PAD/2))
+
+        top_top_frame.pack(side="top", pady=(0,self.PAD/2))
+        top_frame.pack(side="top", pady=(0,self.PAD/2))
+        middle_frame.pack(side="top", pady=(0,self.PAD/2))
+        bottom_frame.pack(side="top", pady=(0,self.PAD/2))
         frame.pack(side="top")
 
     @staticmethod
