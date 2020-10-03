@@ -15,7 +15,9 @@ This is a desktop program designed to help you track daily statistics. Currently
  * Better interface for creating categories, including selecting data type
  * Ability to create backups
  * Generate graphs for given time spans
+ * Compile an executable
  * Maybe make it easier to jump to non-adjacent days
 
 ## Known issues
  * Float values throw an exception when being read
+ * Terminal runs behind GUI for now
