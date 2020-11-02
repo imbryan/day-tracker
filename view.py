@@ -245,15 +245,25 @@ class View(tk.Tk):
         delete_button.pack(side="left", expand=True)
 
         # Middle frame widgets
-        caption_sum_month = "Sum values (month)"
+        caption_sum_month = "Sum (month)"
         sum_month_button = ttk.Button(middle_frame, text=caption_sum_month, command=
         (lambda button=caption_sum_month: self.controller.message_button_click(caption_sum_month)))
         sum_month_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
-        caption_sum_year = "Sum values (year)"
+        caption_sum_year = "Sum (year)"
         sum_year_button = ttk.Button(middle_frame, text=caption_sum_year, command=
         (lambda button=caption_sum_year: self.controller.message_button_click(caption_sum_year)))
         sum_year_button.pack(side="left", expand=True)
+
+        caption_average_month = "Average (month)"
+        average_month_button = ttk.Button(middle_frame, text=caption_average_month, command=
+        (lambda button=caption_average_month: self.controller.message_button_click(caption_average_month)))
+        average_month_button.pack(side="left", expand=True)
+
+        caption_average_year = "Average (year)"
+        average_year_button = ttk.Button(middle_frame, text=caption_average_year, command=
+        (lambda button=caption_average_year: self.controller.message_button_click(caption_average_year)))
+        average_year_button.pack(side="left", expand=True)
 
         # Bottom frame widgets
         caption_help = "Help"
