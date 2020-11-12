@@ -296,7 +296,7 @@ class View(tk.Tk):
     def delete_cat(self):
         cat = self.cat_var.get().lower()
         response = None
-        if cat is not "":
+        if cat != "":
             response = askyesno("WARNING",
                  f"Are you sure you want to delete \"{cat}\"?\nALL of its entries will be permanently deleted.")
         if response:
