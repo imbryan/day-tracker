@@ -59,7 +59,7 @@ class Controller:
     def entry_button_click(self,caption):
         if caption == "Lookup":
             # If there is a category typed in
-            if self.view.cat_var.get().lower() is not '':
+            if self.view.cat_var.get().lower() != '':
                 data = self.db.read_database(self.db.conn, "data", "Entries",
                                              "WHERE category_name = \"{}\" and year = {} and month = {} {}".format(
                                                  self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month,
@@ -83,7 +83,7 @@ class Controller:
         elif caption == "Update":
             try:
                 # If there is input
-                if self.view.cat_var.get() is not '' and self.view.val_var.get() is not '':
+                if self.view.cat_var.get() != '' and self.view.val_var.get() != '':
                     if self.db.read_database(self.db.conn, "data", "Entries",
                                             "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(
                                                     self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day), "string", "one") is None:
@@ -107,7 +107,7 @@ class Controller:
                 else: raise Exception("Missing input in fields")
             except Exception as e: self.view.popup_window("Error", e)
         elif caption == "Set":
-            if self.view.cat_var.get() is not '':
+            if self.view.cat_var.get() != '':
                 self.set_description(self.view.des_var.get(), self.view.cat_var.get().lower())
                 self.view.popup_window("Alert", f"Category description has been set to\n\"{self.view.des_var.get()}\"")
 
@@ -122,7 +122,7 @@ class Controller:
                           "and it will write (or overwrite) the entry for the selected day."
                                    )
         elif caption=="Sum (month)":
-            if self.view.cat_var.get() is not '':  # if there is valid input
+            if self.view.cat_var.get() != '':  # if there is valid input
                 try:
                     data_set = self.db.read_database(self.db.conn, "data", "Entries",
                                           f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}", "int", "all")
@@ -134,7 +134,7 @@ class Controller:
                     self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.month}-{self.view.date.year}:\n\n{sum}")
                 except Exception as e: self.view.popup_window("Error", e)
         elif caption=="Sum (year)":
-            if self.view.cat_var.get() is not '':  # if there is valid input
+            if self.view.cat_var.get() != '':  # if there is valid input
                 try:
                     data_set = self.db.read_database(self.db.conn, "data", "Entries",
                                           f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}", "int", "all")
@@ -146,7 +146,7 @@ class Controller:
                     self.view.popup_window("Result", f"Sum of \"{self.view.cat_var.get()}\" values for {self.view.date.year}:\n\n{sum}")
                 except Exception as e: self.view.popup_window("Error", e)
         elif caption=="Average (month)":
-            if self.view.cat_var.get() is not '':
+            if self.view.cat_var.get() != '':
                 try:
                     data_set = self.db.read_database(self.db.conn, "data", "Entries",
                                                      f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}",
@@ -165,7 +165,7 @@ class Controller:
                 except Exception as e:
                     self.view.popup_window("Error", e)
         elif caption=="Average (year)":
-            if self.view.cat_var.get() is not '':
+            if self.view.cat_var.get() != '':
                 try:
                     data_set = self.db.read_database(self.db.conn, "data", "Entries",
                                                      f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}",
@@ -185,10 +185,10 @@ class Controller:
                     self.view.popup_window("Error", e)
         elif caption == "Toggle reminder for category":
             boolean = self.view.remind_var.get()
-            if boolean == 1 and self.view.cat_var.get().lower() is not '':
+            if boolean == 1 and self.view.cat_var.get().lower() != '':
                 self.db.write_database(self.db.conn, "insert", "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\"")
                 self.db.conn.commit()
-            elif boolean == 0 and self.view.cat_var.get().lower() is not '':
+            elif boolean == 0 and self.view.cat_var.get().lower() != '':
                 self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",
                                        f"\"{self.view.cat_var.get().lower()}\"")
                 self.db.conn.commit()
