@@ -192,7 +192,7 @@ class Controller:
                 self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",
                                        f"\"{self.view.cat_var.get().lower()}\"")
                 self.db.conn.commit()
-            elif boolean == 1 and self.view.cat_var.get().lower() is '':
+            elif boolean == 1 and self.view.cat_var.get().lower() == '':
                 self.view.remind_var.set(0)
 
         elif caption == "List of categories":
