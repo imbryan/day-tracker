@@ -3,7 +3,7 @@ This is a desktop program designed to help you track daily statistics. Requires 
 
 Navigate to this project's directory and run **python controller.py** to execute this script.
 
-You can also build an executable by running **pyinstaller controller.py**. The exe will be found at "dist/controller/controller.exe". Note: if you run the program with the exe, it will use "dist/controller/" as its root directory.
+You can also build an executable by running **pyinstaller controller.py**. The exe will be found at "dist/controller/controller.exe". Note: if you run the program with the exe, it will use "dist/controller/" as its root directory (meaning that the databases under "dist/controller/" will be used instead of those at the project root).
 
 ## Features
 ### Current
