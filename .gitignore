@@ -3,6 +3,6 @@
 backups/
 
 # PyInstaller stuff
-build/*
-dist/*
+build/
+dist/
 *.spec
