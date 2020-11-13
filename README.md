@@ -1,5 +1,9 @@
 # Day Tracker
-This is a desktop program designed to help you track daily statistics. Currently requires python to be installed. Navigate to this project's directory and run **python controller.py** to execute this script.
+This is a desktop program designed to help you track daily statistics. Requires **Python 3** as well as some packages (run **pip install -r requirements.txt**). 
+
+Navigate to this project's directory and run **python controller.py** to execute this script.
+
+You can also build an executable by running **pyinstaller controller.py**. The exe will be found at "/dist/controller.exe". If you run the program with the exe, it will use "/dist/" as its root directory.
 
 ## Features
 ### Current
