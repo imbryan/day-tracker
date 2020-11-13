@@ -1,3 +1,8 @@
 # Database, which will be stored locally
 *.db
 backups/
+
+# PyInstaller stuff
+build/*
+dist/*
+*.spec
