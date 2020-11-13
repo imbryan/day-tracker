@@ -27,6 +27,8 @@ class View(tk.Tk):
         self.val_var = tk.StringVar()
         self.des_var = tk.StringVar()
 
+        self.backup_var = tk.StringVar()
+
         self.reminders = self.controller.check_reminders()
 
         self._make_main_frame()
@@ -80,6 +82,19 @@ class View(tk.Tk):
 
                 top.lift(self)
         except: pass
+
+    def backup(self):
+        top = tk.Toplevel(self)
+        top.title("Backup")
+
+        backup_label = ttk.Label(top, text="Name this backup")
+        backup_label.pack(expand=True, side="left", pady=(self.PAD*2.5))
+
+        backup_entry = ttk.Entry(top, textvariable=self.backup_var)
+        backup_entry.pack(expand=True, side="left")
+
+        backup_button = ttk.Button(top, text="Backup", command=lambda: self.controller.backup(top))
+        backup_button.pack(expand=True, side="left")
 
     def destroy_top(self, top):
         top.destroy()
@@ -270,6 +285,11 @@ class View(tk.Tk):
         help_button = ttk.Button(bottom_frame, text=caption_help, command=
         (lambda button=caption_help: self.controller.message_button_click(caption_help)))
         help_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
+
+        caption_backup = "Create backup"
+        backup_button = ttk.Button(bottom_frame, text=caption_backup, command=
+        (lambda button=caption_backup: self.backup()))
+        backup_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
         caption_exit = "Exit"
         exit_button = ttk.Button(bottom_frame, text=caption_exit, command=self.destroy)

@@ -1,9 +1,9 @@
+import os
 from datetime import datetime, timedelta
 from dateutil import relativedelta
-from model import Category, Entry
 from view import View
-import tkinter as tk
 from database import Database
+from shutil import copyfile
 
 
 class Controller:
@@ -248,6 +248,20 @@ class Controller:
     def set_description(self, desc, cat):
         self.db.write_database(self.db.conn, "update", "Categories", f"description = \"{desc}\"", f"WHERE name = \"{cat}\"")
         self.db.conn.commit()
+
+    # Create db backup
+    def backup(self, top):
+        name = self.view.backup_var.get()
+
+        try:
+            if name == "": raise Exception("No name entered")
+            if os.path.exists(f"backups/{name}.db"): raise Exception("File already exists")
+
+            copyfile(self.db.database, f"backups/{name}.db")
+            top.destroy()
+            self.view.popup_window("Success", f"Backup created at \"backups/{name}.db\"")
+        except Exception as e:
+            self.view.popup_window("Error", e)
 
 
 if __name__ == '__main__':

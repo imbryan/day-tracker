@@ -2,8 +2,8 @@ from model import Category, Entry
 from database import Database
 import datetime
 
-# This is the developer's interface
-# It was once the main interface but is now obsolete with respect to the end user
+# This is a deprecated interface
+# It was once the main interface but is now obsolete with respect to current features
 
 
 class Interface:
