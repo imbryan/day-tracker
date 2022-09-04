@@ -10,3 +10,4 @@ dist/
 # Etc.
 .idea/
 __pycache__
+venv
