@@ -3,7 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('sqlite:///tracker.db')
+DB_FILENAME = 'tracker.db'
+engine = create_engine(f'sqlite:///{DB_FILENAME}')
 Base = declarative_base()
  # Engine connection
 conn = engine.connect()

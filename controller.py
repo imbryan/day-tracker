@@ -3,7 +3,7 @@ import model
 from datetime import datetime, timedelta
 from dateutil import relativedelta
 from view import View
-from database import session
+from database import session, DB_FILENAME
 from shutil import copyfile
 from sqlalchemy import or_
 from sqlalchemy.orm import load_only
@@ -13,6 +13,7 @@ class Controller:
     def __init__(self):
         # self.db = Database() # ! Deprecated
         self.session = session
+        self.db_name = DB_FILENAME
         self.view = View(self, self.session)
 
     def main(self):
@@ -82,7 +83,7 @@ class Controller:
                     self.view.val_var.set(entry.data)
                     self.view.des_var.set(self.get_description(self.view.cat_var.get().lower()))
 
-            # Pull reminder info for queried category
+            # Pull reminder info for queried category  # TODO migrate
             try:
                 if self.db.exists(self.db.conn, "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\""):
                     self.view.remind_var.set(1)
@@ -91,7 +92,7 @@ class Controller:
                 self.view.remind_var.set(0)
         elif caption == "Update":
             try:
-                # If there is input
+                # If there is input  # TODO migrate
                 if self.view.cat_var.get() != '' and self.view.val_var.get() != '':
                     if self.db.read_database(self.db.conn, "data", "Entries",
                                             "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(
@@ -104,13 +105,13 @@ class Controller:
                                           "WHERE category_name = \"{}\" and year = {} and month = {} and day = {}".format(
                                               self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month, self.view.date.day))
 
-                    # Inserts category into database if it is novel
+                    # Inserts category into database if it is novel  # TODO migrate
                     cat_type = "string"
                     if self.view.cat_var.get().isnumeric():
                         cat_type = "float"
                     self.db.write_database(self.db.conn, "insert","Categories","name, type, description", f"\"{self.view.cat_var.get().lower()}\", \"{cat_type}\", \"\"")
 
-                    # Updates entry
+                    # Updates entry  # TODO migrate
                     self.db.conn.commit()
                     self.view.popup_window("Success", f"Entry has been updated to {self.view.val_var.get()}")
                 else: raise Exception("Missing input in fields")
@@ -132,7 +133,7 @@ class Controller:
                                    )
         elif caption=="Sum (month)":
             if self.view.cat_var.get() != '':  # if there is valid input
-                try:
+                try:  # TODO migrate
                     data_set = self.db.read_database(self.db.conn, "data", "Entries",
                                           f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}", "int", "all")
 
@@ -144,7 +145,7 @@ class Controller:
                 except Exception as e: self.view.popup_window("Error", e)
         elif caption=="Sum (year)":
             if self.view.cat_var.get() != '':  # if there is valid input
-                try:
+                try:  # TODO migrate
                     data_set = self.db.read_database(self.db.conn, "data", "Entries",
                                           f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}", "int", "all")
 
@@ -156,7 +157,7 @@ class Controller:
                 except Exception as e: self.view.popup_window("Error", e)
         elif caption=="Average (month)":
             if self.view.cat_var.get() != '':
-                try:
+                try:  # TODO migrate
                     data_set = self.db.read_database(self.db.conn, "data", "Entries",
                                                      f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}",
                                                      "int", "all")
@@ -175,7 +176,7 @@ class Controller:
                     self.view.popup_window("Error", e)
         elif caption=="Average (year)":
             if self.view.cat_var.get() != '':
-                try:
+                try:  # TODO migrate
                     data_set = self.db.read_database(self.db.conn, "data", "Entries",
                                                      f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}",
                                                      "int", "all")
@@ -192,7 +193,7 @@ class Controller:
                                            f"Average of \"{self.view.cat_var.get()}\" values for {self.view.date.year}:\n\n{average} (given {count} entries)")
                 except Exception as e:
                     self.view.popup_window("Error", e)
-        elif caption == "Toggle reminder for category":
+        elif caption == "Toggle reminder for category":  # TODO migrate
             boolean = self.view.remind_var.get()
             if boolean == 1 and self.view.cat_var.get().lower() != '':
                 self.db.write_database(self.db.conn, "insert", "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\"")
@@ -204,14 +205,14 @@ class Controller:
             elif boolean == 1 and self.view.cat_var.get().lower() == '':
                 self.view.remind_var.set(0)
 
-        elif caption == "List of categories":
+        elif caption == "List of categories":  # TODO migrate
             message = ''
             cats = self.db.read_database(self.db.conn, "name", "Categories", None, "string", "all")
             for cat in cats:
                 message+=cat[0]+'\n'
 
             self.view.popup_window("Categories", message)
-        elif caption == "Entries for this day":
+        elif caption == "Entries for this day":  # TODO migrate
             message = ''
             entries = self.db.read_database(self.db.conn, "category_name, data", "Entries",
                                             f"WHERE year = {self.view.date.year} and month = {self.view.date.month} and day = {self.view.date.day}",
@@ -250,9 +251,11 @@ class Controller:
 
     # Get reminder status for a category
     def get_reminder_status(self, cat):
-        data = self.db.read_database(self.db.conn, "id", "Reminders", f"WHERE category_name = \"{cat}\"", "int", "one")
-
-        return data
+        # data = self.db.read_database(self.db.conn, "id", "Reminders", f"WHERE category_name = \"{cat}\"", "int", "one")  # ! Deprecated
+        reminder = self.session.query(model.Reminder).filter(model.Reminder.category_name_from_any==cat).options(load_only('id')).first()
+        if reminder:
+            return True
+        return None
 
     # Get description from db
     def get_description(self, cat):
@@ -264,8 +267,12 @@ class Controller:
 
     # Set description to db
     def set_description(self, desc, cat):
-        self.db.write_database(self.db.conn, "update", "Categories", f"description = \"{desc}\"", f"WHERE name = \"{cat}\"")
-        self.db.conn.commit()
+        # self.db.write_database(self.db.conn, "update", "Categories", f"description = \"{desc}\"", f"WHERE name = \"{cat}\"")
+        # self.db.conn.commit()  # ! Deprecated
+        self.session.query(model.Category).filter_by(name=cat).update(
+            {'description': desc}
+        )
+        self.session.commit()
 
     # Create db backup
     def backup(self, top):
@@ -273,9 +280,11 @@ class Controller:
 
         try:
             if name == "": raise Exception("No name entered")
+            if not os.path.exists('backups'):
+                os.makedirs('backups')
             if os.path.exists(f"backups/{name}.db"): raise Exception("File already exists")
 
-            copyfile(self.db.database, f"backups/{name}.db")
+            copyfile(self.db_name, f"backups/{name}.db")
             top.destroy()
             self.view.popup_window("Success", f"Backup created at \"backups/{name}.db\"")
         except Exception as e:
