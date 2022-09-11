@@ -5,27 +5,6 @@ from sqlalchemy.ext.declarative import declarative_base
 engine = create_engine('sqlite:///tracker.db')
 Base = declarative_base()
 
-# NOTE: tables and columns will follow naming convention established in legacy db connection
-# ... for the sake of backwards compatibility
-
-class Category(Base):
-    __tablename__ = 'Categories'
-
-    # TODO fields
-
-
-class Entry(Base):
-    __tablename__ = 'Entries'
-
-    # TODO fields
-
-
-class Reminder(Base):
-    __tablename__ = 'Reminders'
-
-    # TODO fields
-
-
 
 # ! The following "Database" class is deprecated
 # ! It has been superceded by the use of the SQLAlchemy ORM
