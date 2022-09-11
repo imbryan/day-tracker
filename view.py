@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk  # More native looking widgets
 from tkinter.messagebox import showinfo, askyesno
 import datetime
+import model
+from sqlalchemy import or_
 
 
 class View(tk.Tk):
@@ -12,7 +14,8 @@ class View(tk.Tk):
     def __init__(self, controller, db):
         super().__init__()  # Call Tk constructor
         self.controller = controller
-        self.db = db
+        # self.db = db  # ! Deprecated
+        self.session = db  # NOTE "db" -> SQLAlchemy session object
 
         self.title("Day Tracker")
 
@@ -53,9 +56,15 @@ class View(tk.Tk):
     def remind(self, list):
         new_list = []
         for item in list:
-            if self.db.read_database(self.db.conn, "data", "Entries",
-                                     f"WHERE category_name = \"{item}\" and year = {self.date.year} and month = {self.date.month} and day = {self.date.day}",
-                                     "int", "one") is None:
+            # if self.db.read_database(self.db.conn, "data", "Entries",
+            #                          f"WHERE category_name = \"{item}\" and year = {self.date.year} and month = {self.date.month} and day = {self.date.day}",
+            #                          "int", "one") is None:  # ! Deprecated
+            if self.session.query(model.Entry).filter_by(year=self.date.year, month=self.date.month, day=self.date.day)\
+                .join(model.Category, or_(model.Category.id==model.Entry.category_id, model.Category.name == model.Entry.category_name))\
+                    .filter(
+                        or_(model.Category.name == item, model.Entry.category_name == item),
+                        model.Entry.data == None,
+                    ).first():
                 new_list.append(item)
 
         try:
@@ -320,13 +329,20 @@ class View(tk.Tk):
             response = askyesno("WARNING",
                  f"Are you sure you want to delete \"{cat}\"?\nALL of its entries will be permanently deleted.")
         if response:
-            self.db.write_database(self.db.conn, "delete", "Entries", "category_name",
-                                   f"\"{cat}\"")
-            self.db.write_database(self.db.conn, "delete", "Categories", "name",
-                                   f"\"{cat}\"")
-            self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",
-                                   f"\"{cat}\"")
-            self.db.conn.commit()
+            # self.db.write_database(self.db.conn, "delete", "Entries", "category_name",
+            #                        f"\"{cat}\"")
+            # self.db.write_database(self.db.conn, "delete", "Categories", "name",
+            #                        f"\"{cat}\"")
+            # self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",
+            #                        f"\"{cat}\"")
+            # self.db.conn.commit()  # ! Deprecated
+            self.session.query(model.Entry).join(model.Category, or_(model.Category.name==model.Entry.category_name, model.Category.id==model.Entry.category_id))\
+                .filter(or_(model.Category.name == cat, model.Entry.category_name == cat)).delete()
+            self.session.query(model.Reminder).filter(
+                or_(cat==category_name for category_name in model.Reminder.category_name_from_any)
+            ).delete()
+            self.session.query(model.Category).filter_by(name=cat).delete()
+            self.session.commit()
 
             self.cat_var.set("")
             self.val_var.set("")

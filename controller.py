@@ -1,15 +1,26 @@
 import os
+import model
 from datetime import datetime, timedelta
 from dateutil import relativedelta
 from view import View
-from database import Database
+from database import Database, engine, Base
 from shutil import copyfile
+from sqlalchemy.orm import sessionmaker
 
 
 class Controller:
     def __init__(self):
-        self.db = Database()
-        self.view = View(self, self.db)
+        # self.db = Database() # ! Deprecated
+        # Engine connection
+        conn = engine.connect()
+        # Create tables
+        Base.metadata.create_all(engine)
+        # Session maker
+        Session = sessionmaker(bind=engine)
+        session = Session()
+
+        self.session = session
+        self.view = View(self, self.session)
 
     def main(self):
         self.view.main()
@@ -220,12 +231,14 @@ class Controller:
 
     # Checks db for set reminders
     def check_reminders(self):
-        data_set = self.db.read_database(self.db.conn, "category_name", "Reminders", None, "string", "all")
+        # data_set = self.db.read_database(self.db.conn, "category_name", "Reminders", None, "string", "all")  # ! Deprecated
+        data_set = self.session.query(model.Reminder).all()
         list = []
 
         try:
             for data in data_set:
-                list.append(data[0])
+                # list.append(data[0])  # ! Deprecated
+                list.append(*data.category_name_from_any)
         except Exception as e:
             print(e)
             return None

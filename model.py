@@ -1,7 +1,8 @@
 from database import Base
 import datetime
-from sqlalchemy import Column, Integer, Text, ForeignKey, BigInteger
+from sqlalchemy import Column, Integer, Text, ForeignKey, BigInteger, or_
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 # NOTE: tables and columns will follow naming convention established in legacy db connection
@@ -15,7 +16,7 @@ class Category(Base):
     type = Column(Text)
     description = Column(Text)
 
-    reminder = relationship("Reminders", uselist=False)
+    reminder = relationship("Reminder", uselist=False, back_populates="category")
 
 
 class Entry(Base):
@@ -29,11 +30,16 @@ class Entry(Base):
     day = Column(Integer)
     data = Column(Text)
 
-    category = relationship("Categories")
+    category = relationship("Category")
 
     @property
     def date(self):
         return datetime.date(self.year, self.month, self.day)
+
+    @hybrid_property
+    def category_name_from_any(self):
+        return Category.query.with_entities(Category.name)\
+            .join(Entry, or_(Entry.category_name==Category.name, Entry.category_id==Category.id))
 
 
 class Reminder(Base):
@@ -43,7 +49,12 @@ class Reminder(Base):
     category_name = Column(Text)  # ! Legacy field
     category_id = Column(Integer, ForeignKey('Categories.id'))  # NOTE supercedes category_name
 
-    category = relationship("Categories", uselist=False)
+    category = relationship("Category", uselist=False, back_populates="reminder")
+
+    @hybrid_property
+    def category_name_from_any(self):
+        return Category.query.with_entities(Category.name)\
+            .join(Reminder, or_(Reminder.category_name==Category.name, Reminder.category_id==Category.id))
 
 
 # ! Pre-SQLAlchemy model schema below
