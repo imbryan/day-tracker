@@ -1,7 +1,7 @@
-from database import Base
+from database import Base, session
 import datetime
 from sqlalchemy import Column, Integer, Text, ForeignKey, BigInteger, or_
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, load_only
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
@@ -12,7 +12,7 @@ class Category(Base):
     __tablename__ = 'Categories'
 
     id = Column(Integer, primary_key=True)
-    name = Column(Text)
+    name = Column(Text, unique=True)
     type = Column(Text)
     description = Column(Text)
 
@@ -38,8 +38,12 @@ class Entry(Base):
 
     @hybrid_property
     def category_name_from_any(self):
-        return Category.query.with_entities(Category.name)\
-            .join(Entry, or_(Entry.category_name==Category.name, Entry.category_id==Category.id))
+        category = session.query(Category)\
+            .join(Entry, or_(Entry.category_name==Category.name, Entry.category_id==Category.id))\
+                .options(load_only('name')).first()
+        if category:
+            return category.name
+        return None
 
 
 class Reminder(Base):
@@ -53,8 +57,12 @@ class Reminder(Base):
 
     @hybrid_property
     def category_name_from_any(self):
-        return Category.query.with_entities(Category.name)\
-            .join(Reminder, or_(Reminder.category_name==Category.name, Reminder.category_id==Category.id))
+        category = session.query(Category)\
+            .join(Reminder, or_(Reminder.category_name==Category.name, Reminder.category_id==Category.id))\
+                .options(load_only('name')).first()
+        if category:
+            return category.name
+        return None
 
 
 # ! Pre-SQLAlchemy model schema below

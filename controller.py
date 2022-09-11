@@ -3,22 +3,15 @@ import model
 from datetime import datetime, timedelta
 from dateutil import relativedelta
 from view import View
-from database import Database, engine, Base
+from database import session
 from shutil import copyfile
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import or_
+from sqlalchemy.orm import load_only
 
 
 class Controller:
     def __init__(self):
         # self.db = Database() # ! Deprecated
-        # Engine connection
-        conn = engine.connect()
-        # Create tables
-        Base.metadata.create_all(engine)
-        # Session maker
-        Session = sessionmaker(bind=engine)
-        session = Session()
-
         self.session = session
         self.view = View(self, self.session)
 
@@ -71,17 +64,22 @@ class Controller:
         if caption == "Lookup":
             # If there is a category typed in
             if self.view.cat_var.get().lower() != '':
-                data = self.db.read_database(self.db.conn, "data", "Entries",
-                                             "WHERE category_name = \"{}\" and year = {} and month = {} {}".format(
-                                                 self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month,
-                                                 'and day = ' + str(self.view.date.day)), "string",
-                                             "one")
-
-                if data is None:  # Empty entry
+                # data = self.db.read_database(self.db.conn, "data", "Entries",
+                #                              "WHERE category_name = \"{}\" and year = {} and month = {} {}".format(
+                #                                  self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month,
+                #                                  'and day = ' + str(self.view.date.day)), "string",
+                #                              "one")  # ! Deprecated
+                entry = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month, day=self.view.date.day)\
+                    .filter(
+                        self.view.cat_var.get().lower()==model.Entry.category_name_from_any
+                    ).first()
+                # print('category_name_from_any', self.session.query(model.Entry).first().category_name_from_any)  # NOTE: debug
+                if entry is None:  # Empty entry
                     self.view.val_var.set('')
                     self.view.popup_window("Alert", "No value found for this day")
                 else:             # Entry exists
-                    self.view.val_var.set(data[0])
+                    # self.view.val_var.set(data[0])  # ! Deprecated
+                    self.view.val_var.set(entry.data)
                     self.view.des_var.set(self.get_description(self.view.cat_var.get().lower()))
 
             # Pull reminder info for queried category
@@ -225,9 +223,14 @@ class Controller:
 
     # Get value for a category
     def get_value(self, cat, date):
-        data = self.db.read_database(self.db.conn, "data", "Entries", f"WHERE category_name = \"{cat}\" and year = {date.year} and month = {date.month} and day = {date.day}", "string", "one")
-
-        return data
+        # data = self.db.read_database(self.db.conn, "data", "Entries", f"WHERE category_name = \"{cat}\" and year = {date.year} and month = {date.month} and day = {date.day}", "string", "one")  # ! Deprecated
+        entry = self.session.query(model.Entry).filter_by(year=date.year, month=date.month, day=date.day)\
+            .filter(
+                cat==model.Entry.category_name_from_any
+            ).options(load_only('data')).first()
+        if entry:
+            return entry.data
+        return None
 
     # Checks db for set reminders
     def check_reminders(self):
@@ -238,7 +241,7 @@ class Controller:
         try:
             for data in data_set:
                 # list.append(data[0])  # ! Deprecated
-                list.append(*data.category_name_from_any)
+                list.append(data.category_name_from_any)
         except Exception as e:
             print(e)
             return None
@@ -253,9 +256,11 @@ class Controller:
 
     # Get description from db
     def get_description(self, cat):
-        data = self.db.read_database(self.db.conn, "description", "Categories", f"WHERE name = \"{cat}\"", "string", "one")
-
-        return data
+        # data = self.db.read_database(self.db.conn, "description", "Categories", f"WHERE name = \"{cat}\"", "string", "one")  # ! Deprecated
+        category = self.session.query(model.Category).filter_by(name=cat).options(load_only('description')).first()
+        if category:
+            return category.description
+        return None
 
     # Set description to db
     def set_description(self, desc, cat):
