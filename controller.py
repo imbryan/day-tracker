@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from dateutil import relativedelta
 from view import View
 from database import session, DB_FILENAME
+from setup import add_missing_columns_from_sqlalchemy_migration
 from shutil import copyfile
 from sqlalchemy import or_
 from sqlalchemy.orm import load_only
@@ -14,6 +15,17 @@ class Controller:
         # self.db = Database() # ! Deprecated
         self.session = session
         self.db_name = DB_FILENAME
+
+        # Checks if setup scripts are needed
+        try:
+            # Checking for SQLAlchemy Migration changes
+            self.session.query(model.Reminder).filter(model.Reminder.category_id==1).all()
+            self.session.query(model.Entry).filter(model.Entry.category_id==1).all()
+            ### passed all checks ###
+        except:
+            print('Running setup scripts')
+            add_missing_columns_from_sqlalchemy_migration(self.session)
+
         self.view = View(self, self.session)
 
     def main(self):
