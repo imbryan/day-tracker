@@ -55,6 +55,7 @@ class Controller:
             pass
 
         val = self.get_value(self.view.cat_var.get().lower(), self.view.date)
+        # print(f'get_value {self.view.cat_var.get().lower()} {val}')
         if val is not None:
             self.view.val_var.set(val)
         else:
@@ -172,7 +173,7 @@ class Controller:
                     #                       f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}", "int", "all")
                     data_set = self.session.query(model.Entry).filter_by(year=self.view.date.year)\
                         .filter(
-                            model.Entry.category_name_From_any==self.view.cat_var.get().lower()
+                            model.Entry.category_name_from_any==self.view.cat_var.get().lower()
                         ).options(load_only('data')).all()
                     sum = 0
                     for entry in data_set:
@@ -191,13 +192,18 @@ class Controller:
                             model.Entry.category_name_from_any==self.view.cat_var.get().lower()
                         ).options(load_only('data')).all()
                     sum = 0
+                    use_date = self.view.date
+                    if datetime.now().date() > use_date.date():
+                        # Calculate whole month if it's already past
+                        use_date = use_date.replace(day=1,month=use_date.month+1) - timedelta(days=1)
+                    count = (use_date - use_date.replace(day=1)).days + 1
                     for entry in data_set:
                         sum += int(getattr(entry, 'data', 0))
 
-                    average = round(sum / len(data_set), 2)
+                    average = round(sum / count, 2)
 
                     self.view.popup_window("Result",
-                                       f"Average of \"{self.view.cat_var.get()}\" values for {self.view.date.month}-{self.view.date.year}:\n\n{average} (given {len(data_set)} entries)")
+                                       f"Average of \"{self.view.cat_var.get()}\" values for {self.view.date.month}-{self.view.date.year}:\n\n{average} (given {count} days)")
                 except Exception as e:
                     self.view.popup_window("Error", e)
         elif caption=="Average (year)":
@@ -212,13 +218,20 @@ class Controller:
                         ).options(load_only('data')).all()
 
                     sum = 0
+                    use_date = self.view.date
+                    if datetime.now().year > use_date.year:  
+                        # Calculate whole year if it's already past
+                        use_date = use_date.replace(day=1,month=1,year=use_date.year+1) - timedelta(days=1)
+                    count = (use_date - use_date.replace(month=1, day=1)).days + 1
                     for entry in data_set:
                         sum += int(getattr(entry, 'data', 0))
 
-                    average = round(sum / len(data_set), 2)
+                    average = round(sum / count, 2)
 
-                    self.view.popup_window("Result",
-                                           f"Average of \"{self.view.cat_var.get()}\" values for {self.view.date.year}:\n\n{average} (given {len(data_set)} entries)")
+                    self.view.popup_window(
+                        "Result",
+                        f"Average of \"{self.view.cat_var.get()}\" values for {self.view.date.year}:\n\n{average} (given {count} days)"
+                    )
                 except Exception as e:
                     self.view.popup_window("Error", e)
         elif caption == "Toggle reminder for category":
@@ -255,18 +268,25 @@ class Controller:
             #                                 "string", "all")
             entries = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month, day=self.view.date.day).all()
             for entry in entries:
-                message+=f"{entry.category.name}: {entry.data}\n"
+                message+=f"{entry.category_name_from_any}: {entry.data}\n"
 
             self.view.popup_window("Entries for this day", message)
 
     # Get value for a category
     def get_value(self, cat, date):
+        # TODO secondary debugging of category_name_from_any
+        print(f'inside get_value cat {cat}')
         # data = self.db.read_database(self.db.conn, "data", "Entries", f"WHERE category_name = \"{cat}\" and year = {date.year} and month = {date.month} and day = {date.day}", "string", "one")  # ! Deprecated
         entry = self.session.query(model.Entry).filter_by(year=date.year, month=date.month, day=date.day)\
             .filter(
-                cat==model.Entry.category_name_from_any
-            ).options(load_only('data')).first()
+                model.Entry.category_name_from_any==cat
+            ).options(load_only('data'))
+        print(f'entry query {entry}')
+        print(f'entry all {entry.all()}')
+        entry = entry.first()
         if entry:
+            print(f'get_value entry.category.name {entry.category_name_from_any}')
+            print(f'get_value entry.data {entry.data}')
             return entry.data
         return None
 
@@ -284,7 +304,7 @@ class Controller:
         if current_entry:
             current_entry.data = value
         else:
-            new_entry = model.Entry(year=date.year, month=date.month, day=date.day, category_id=category.id, value=value)
+            new_entry = model.Entry(year=date.year, month=date.month, day=date.day, category_id=category.id, data=value)
             self.session.add(new_entry)
         self.session.commit()
 

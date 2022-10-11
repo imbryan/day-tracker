@@ -1,6 +1,6 @@
 from database import Base, session
 import datetime
-from sqlalchemy import Column, Integer, Text, ForeignKey, BigInteger, or_
+from sqlalchemy import Column, Integer, Text, ForeignKey, BigInteger, or_, case, func, select
 from sqlalchemy.orm import relationship, load_only
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -36,14 +36,17 @@ class Entry(Base):
     def date(self):
         return datetime.date(self.year, self.month, self.day)
 
+    # TODO debug
     @hybrid_property
     def category_name_from_any(self):
-        category = session.query(Category)\
-            .join(Entry, or_(Entry.category_name==Category.name, Entry.category_id==Category.id))\
-                .options(load_only('name')).first()
-        if category:
-            return category.name
-        return None
+        if self.category_id:
+            return self.category.name
+        return self.category_name
+
+    @category_name_from_any.expression
+    def category_name_from_any(cls):
+        return select([Category.name])\
+            .where(Category.id==cls.category_id)
 
 
 class Reminder(Base):
@@ -55,14 +58,21 @@ class Reminder(Base):
 
     category = relationship("Category", uselist=False, back_populates="reminder")
 
+    # TODO debug
     @hybrid_property
     def category_name_from_any(self):
-        category = session.query(Category)\
-            .join(Reminder, or_(Reminder.category_name==Category.name, Reminder.category_id==Category.id))\
-                .options(load_only('name')).first()
-        if category:
-            return category.name
-        return None
+        if self.category_id:
+            return self.category.name
+        return self.category_name
+
+    @category_name_from_any.expression
+    def category_name_from_any(cls):
+        return case(
+            [
+                (cls.category_id != None, Category.name)
+            ],
+            else_=cls.category_name
+        )
 
 
 # ! Pre-SQLAlchemy model schema below
