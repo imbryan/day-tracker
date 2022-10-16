@@ -45,8 +45,10 @@ class Entry(Base):
 
     @category_name_from_any.expression
     def category_name_from_any(cls):
-        return select([Category.name])\
-            .where(Category.id==cls.category_id)
+        q = session.query(Category).with_entities(Category.name)\
+            .filter(or_(cls.category_id==Category.id, cls.category_name==Category.name))
+        print('q', q)
+        return q
 
 
 class Reminder(Base):
@@ -67,12 +69,8 @@ class Reminder(Base):
 
     @category_name_from_any.expression
     def category_name_from_any(cls):
-        return case(
-            [
-                (cls.category_id != None, Category.name)
-            ],
-            else_=cls.category_name
-        )
+        return session.query(Category).with_entities(Category.name)\
+            .filter(or_(cls.category_id==Category.id, cls.category_name==Category.name))
 
 
 # ! Pre-SQLAlchemy model schema below
