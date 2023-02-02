@@ -1,5 +1,22 @@
 import sqlite3 as lite
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
+DB_FILENAME = 'tracker.db'
+engine = create_engine(f'sqlite:///{DB_FILENAME}')
+Base = declarative_base()
+ # Engine connection
+conn = engine.connect()
+# Create tables
+Base.metadata.create_all(engine)
+# Session maker
+Session = sessionmaker(bind=engine)
+session = Session()
+
+
+# ! The following "Database" class is deprecated
+# ! It has been superceded by the use of the SQLAlchemy ORM
 
 class Database:
     def __init__(self):
