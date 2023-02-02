@@ -17,6 +17,7 @@ You can also build an executable by running **pyinstaller controller.py**. The e
    * Note: loading a backup is currently done manually by moving it to the project directory and naming it "tracker.db"
 
 ### To-do
+ * Web sync
  * Button to load backups
  * Select category from list to lookup
  * Better interface for creating categories, including selecting data type
