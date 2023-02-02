@@ -59,12 +59,15 @@ class View(tk.Tk):
             # if self.db.read_database(self.db.conn, "data", "Entries",
             #                          f"WHERE category_name = \"{item}\" and year = {self.date.year} and month = {self.date.month} and day = {self.date.day}",
             #                          "int", "one") is None:  # ! Deprecated
-            if self.session.query(model.Entry).filter_by(year=self.date.year, month=self.date.month, day=self.date.day)\
+            check_todays_entry = self.session.query(model.Entry)\
                 .join(model.Category, or_(model.Category.id==model.Entry.category_id, model.Category.name == model.Entry.category_name))\
                     .filter(
                         or_(model.Category.name == item, model.Entry.category_name == item),
-                        model.Entry.data == None,
-                    ).first():
+                        model.Entry.year==self.date.year, 
+                        model.Entry.month==self.date.month, 
+                        model.Entry.day==self.date.day,
+                    ).first()
+            if not check_todays_entry or check_todays_entry.data is None:
                 new_list.append(item)
 
         try:
@@ -336,11 +339,11 @@ class View(tk.Tk):
             # self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",
             #                        f"\"{cat}\"")
             # self.db.conn.commit()  # ! Deprecated
-            self.session.query(model.Entry).join(model.Category, or_(model.Category.name==model.Entry.category_name, model.Category.id==model.Entry.category_id))\
-                .filter(or_(model.Category.name == cat, model.Entry.category_name == cat)).delete()
-            self.session.query(model.Reminder).filter(
-                or_(cat==category_name for category_name in model.Reminder.category_name_from_any)
-            ).delete()
+            to_delete_cat = self.session.query(model.Category).filter_by(name=cat).first()
+            self.session.query(model.Entry)\
+                .filter(or_(model.Entry.category_id==to_delete_cat.id, model.Entry.category_name == to_delete_cat.name)).delete()
+            self.session.query(model.Reminder)\
+                .filter(or_(model.Reminder.category_id == to_delete_cat.id, model.Reminder.category_name == to_delete_cat.name)).delete()
             self.session.query(model.Category).filter_by(name=cat).delete()
             self.session.commit()
 

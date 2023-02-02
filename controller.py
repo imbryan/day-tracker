@@ -2,9 +2,10 @@ import os
 import model
 from datetime import datetime, timedelta
 from dateutil import relativedelta
+import time
 from view import View
 from database import session, DB_FILENAME
-from setup import add_missing_columns_from_sqlalchemy_migration
+from setup import add_missing_columns_from_sqlalchemy_migration, populate_reminders_category_ids, populate_entries_category_ids
 from shutil import copyfile
 from sqlalchemy import or_
 from sqlalchemy.orm import load_only
@@ -21,10 +22,19 @@ class Controller:
             # Checking for SQLAlchemy Migration changes
             self.session.query(model.Reminder).filter(model.Reminder.category_id==1).all()
             self.session.query(model.Entry).filter(model.Entry.category_id==1).all()
-            ### passed all checks ###
         except:
             print('Running setup scripts')
             add_missing_columns_from_sqlalchemy_migration(self.session)
+        # Checking for NULL category_id fields
+        check_reminders = self.session.query(model.Reminder).filter(model.Reminder.category_id==None).all()
+        if check_reminders:
+            print(f'{len(check_reminders)} legacy reminders detected')
+            populate_reminders_category_ids(self.session, check_reminders)
+        check_entries = self.session.query(model.Entry).filter(model.Entry.category_id==None).all()
+        if check_entries:
+            print(f'{len(check_entries)} legacy entries detected')
+            populate_entries_category_ids(self.session, check_entries)
+        ### passed all checks ###
 
         self.view = View(self, self.session)
 
@@ -77,17 +87,20 @@ class Controller:
     def entry_button_click(self,caption):
         if caption == "Lookup":
             # If there is a category typed in
-            if self.view.cat_var.get().lower() != '':
+            category_input = self.view.cat_var.get().lower()
+            if category_input != '':
                 # data = self.db.read_database(self.db.conn, "data", "Entries",
                 #                              "WHERE category_name = \"{}\" and year = {} and month = {} {}".format(
                 #                                  self.view.cat_var.get().lower(), self.view.date.year, self.view.date.month,
                 #                                  'and day = ' + str(self.view.date.day)), "string",
                 #                              "one")  # ! Deprecated
-                entry = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month, day=self.view.date.day)\
+                entry = self.session.query(model.Entry).join(model.Category, model.Category.id==model.Entry.category_id)\
                     .filter(
-                        self.view.cat_var.get().lower()==model.Entry.category_name_from_any
+                        model.Category.name == category_input,
+                        model.Entry.year==self.view.date.year, 
+                        model.Entry.month==self.view.date.month, 
+                        model.Entry.day==self.view.date.day
                     ).first()
-                # print('category_name_from_any', self.session.query(model.Entry).first().category_name_from_any)  # NOTE: debug
                 if entry is None:  # Empty entry
                     self.view.val_var.set('')
                     self.view.popup_window("Alert", "No value found for this day")
@@ -98,9 +111,9 @@ class Controller:
 
             # Pull reminder info for queried category 
             try:
-                reminder = self.session.query(model.Reminder)\
+                reminder = self.session.query(model.Reminder).join(model.Category, model.Category.id == model.Reminder.category_id)\
                     .filter(
-                        model.Reminder.category_name_from_any == self.view.cat_var.get().lower()
+                        model.Category.name == self.view.cat_var.get().lower()
                     ).first()
                 # if self.db.exists(self.db.conn, "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\""):  # ! Deprecated
                 if reminder:
@@ -155,9 +168,11 @@ class Controller:
                 try:
                     # data_set = self.db.read_database(self.db.conn, "data", "Entries",  # ! Deprecated
                     #                       f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}", "int", "all")
-                    data_set = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month)\
+                    data_set = self.session.query(model.Entry).join(model.Category, model.Category.id==model.Entry.category_id)\
                         .filter(
-                            model.Entry.category_name_from_any==self.view.cat_var.get().lower()
+                            model.Category.name==self.view.cat_var.get().lower(),
+                            model.Entry.year==self.view.date.year, 
+                            model.Entry.month==self.view.date.month
                         ).options(load_only('data')).all()
 
                     sum = 0
@@ -171,9 +186,10 @@ class Controller:
                 try:
                     # data_set = self.db.read_database(self.db.conn, "data", "Entries",  # ! Deprecated
                     #                       f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}", "int", "all")
-                    data_set = self.session.query(model.Entry).filter_by(year=self.view.date.year)\
+                    data_set = self.session.query(model.Entry).join(model.Category, model.Category.id==model.Entry.category_id)\
                         .filter(
-                            model.Entry.category_name_from_any==self.view.cat_var.get().lower()
+                            model.Category.name==self.view.cat_var.get().lower(),
+                            model.Entry.year==self.view.date.year
                         ).options(load_only('data')).all()
                     sum = 0
                     for entry in data_set:
@@ -187,9 +203,11 @@ class Controller:
                     # data_set = self.db.read_database(self.db.conn, "data", "Entries",  # ! Deprecated
                     #                                  f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year} and month = {self.view.date.month}",
                     #                                  "int", "all")
-                    data_set = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month)\
+                    data_set = self.session.query(model.Entry).join(model.Category, model.Category.id==model.Entry.category_id)\
                         .filter(
-                            model.Entry.category_name_from_any==self.view.cat_var.get().lower()
+                            model.Category.name==self.view.cat_var.get().lower(),
+                            model.Entry.year==self.view.date.year, 
+                            model.Entry.month==self.view.date.month
                         ).options(load_only('data')).all()
                     sum = 0
                     use_date = self.view.date
@@ -212,9 +230,10 @@ class Controller:
                     # data_set = self.db.read_database(self.db.conn, "data", "Entries",  # ! Deprecated
                     #                                  f"WHERE category_name = \"{self.view.cat_var.get().lower()}\" and year = {self.view.date.year}",
                     #                                  "int", "all")
-                    data_set = self.session.query(model.Entry).filter_by(year=self.view.date.year)\
+                    data_set = self.session.query(model.Entry).join(model.Category, model.Category.id==model.Entry.category_id)\
                         .filter(
-                            model.Entry.category_name_from_any==self.view.cat_var.get().lower()
+                            model.Category.name==self.view.cat_var.get().lower(),
+                            model.Entry.year==self.view.date.year
                         ).options(load_only('data')).all()
 
                     sum = 0
@@ -268,25 +287,23 @@ class Controller:
             #                                 "string", "all")
             entries = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month, day=self.view.date.day).all()
             for entry in entries:
-                message+=f"{entry.category_name_from_any}: {entry.data}\n"
+                message+=f"{entry.category.name}: {entry.data}\n"
 
             self.view.popup_window("Entries for this day", message)
 
     # Get value for a category
     def get_value(self, cat, date):
-        # TODO secondary debugging of category_name_from_any
-        print(f'inside get_value cat {cat}')
         # data = self.db.read_database(self.db.conn, "data", "Entries", f"WHERE category_name = \"{cat}\" and year = {date.year} and month = {date.month} and day = {date.day}", "string", "one")  # ! Deprecated
-        entry = self.session.query(model.Entry).filter_by(year=date.year, month=date.month, day=date.day)\
+        entry = self.session.query(model.Entry)\
+            .join(model.Category, model.Category.id==model.Entry.category_id)\
             .filter(
-                model.Entry.category_name_from_any==cat
+                model.Category.name==cat,
+                model.Entry.year==date.year,
+                model.Entry.month==date.month, 
+                model.Entry.day==date.day,
             ).options(load_only('data'))
-        print(f'entry query {entry}')
-        print(f'entry all {entry.all()}')
         entry = entry.first()
         if entry:
-            print(f'get_value entry.category.name {entry.category_name_from_any}')
-            print(f'get_value entry.data {entry.data}')
             return entry.data
         return None
 
@@ -295,11 +312,22 @@ class Controller:
         category = self.session.query(model.Category).filter(or_(model.Category.name==cat_id_or_name, model.Category.id==cat_id_or_name)).first()
         if not category:
             # You wouldn't be passing an ID if the category didn't exist
-            category = model.Category(name=cat_id_or_name, type="float" if value.isnumeric() else "string")
+            if value.isnumeric():
+                category_type = 'float'
+            else:
+                category_type = 'string'
+            try:
+                time.strptime(value, '%H:%M')
+                category_type = 'time'
+            except: pass
+            category = model.Category(name=cat_id_or_name, type=category_type)
             self.session.add(category)
-        current_entry = self.session.query(model.Entry).filter_by(year=date.year, month=date.month, day=date.day)\
+        current_entry = self.session.query(model.Entry).join(model.Category, model.Category.id==model.Entry.category_id)\
             .filter(
-                model.Entry.category_name_from_any==cat_id_or_name
+                or_(model.Category.name==cat_id_or_name, model.Category.id==cat_id_or_name),
+                model.Entry.year==date.year, 
+                model.Entry.month==date.month,
+                model.Entry.day==date.day
             ).first()
         if current_entry:
             current_entry.data = value
@@ -318,7 +346,7 @@ class Controller:
         try:
             for data in data_set:
                 # list.append(data[0])  # ! Deprecated
-                list.append(data.category_name_from_any)
+                list.append(data.category.name)
         except Exception as e:
             print(e)
             return None
@@ -328,7 +356,8 @@ class Controller:
     # Get reminder status for a category
     def get_reminder_status(self, cat):
         # data = self.db.read_database(self.db.conn, "id", "Reminders", f"WHERE category_name = \"{cat}\"", "int", "one")  # ! Deprecated
-        reminder = self.session.query(model.Reminder).filter(model.Reminder.category_name_from_any==cat).options(load_only('id')).first()
+        reminder = self.session.query(model.Reminder).join(model.Category, model.Category.id==model.Reminder.category_id)\
+            .filter(model.Category.name==cat).options(load_only('id')).first()
         if reminder:
             return True
         return None
@@ -339,7 +368,7 @@ class Controller:
         category = self.session.query(model.Category).filter_by(name=cat).options(load_only('description')).first()
         if category:
             return category.description
-        return None
+        return ''
 
     # Set description to db
     def set_description(self, desc, cat):

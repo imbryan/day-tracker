@@ -10,6 +10,9 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 class Category(Base):
     __tablename__ = 'Categories'
+    OPTIONS = {
+        'type': ['float', 'string', 'time']
+    }
 
     id = Column(Integer, primary_key=True)
     name = Column(Text, unique=True)
@@ -36,20 +39,6 @@ class Entry(Base):
     def date(self):
         return datetime.date(self.year, self.month, self.day)
 
-    # TODO debug
-    @hybrid_property
-    def category_name_from_any(self):
-        if self.category_id:
-            return self.category.name
-        return self.category_name
-
-    @category_name_from_any.expression
-    def category_name_from_any(cls):
-        q = session.query(Category).with_entities(Category.name)\
-            .filter(or_(cls.category_id==Category.id, cls.category_name==Category.name))
-        print('q', q)
-        return q
-
 
 class Reminder(Base):
     __tablename__ = 'Reminders'
@@ -59,18 +48,6 @@ class Reminder(Base):
     category_id = Column(Integer, ForeignKey('Categories.id'))  # NOTE supercedes category_name
 
     category = relationship("Category", uselist=False, back_populates="reminder")
-
-    # TODO debug
-    @hybrid_property
-    def category_name_from_any(self):
-        if self.category_id:
-            return self.category.name
-        return self.category_name
-
-    @category_name_from_any.expression
-    def category_name_from_any(cls):
-        return session.query(Category).with_entities(Category.name)\
-            .filter(or_(cls.category_id==Category.id, cls.category_name==Category.name))
 
 
 # ! Pre-SQLAlchemy model schema below
