@@ -17,16 +17,13 @@ You can also build an executable by running **pyinstaller controller.py**. The e
    * Note: loading a backup is currently done manually by moving it to the project directory and naming it "tracker.db"
 
 ### To-do
- * Add SQLAlchemy as ORM engine
-   * Category model
-   * Entry model
  * Button to load backups
  * Select category from list to lookup
  * Better interface for creating categories, including selecting data type
  * Generate graphs for given time spans
- * Compile an executable
- * Maybe make it easier to jump to non-adjacent days
+ * Make a streamlined executable that doesn't require convoluted instructions
+ * Make it easier to jump to non-adjacent days
 
 ## Known issues
  * Float values throw an exception when being read
- * Terminal runs behind GUI for now
+ * Terminal runs behind GUI
