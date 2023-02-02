@@ -1,5 +1,5 @@
 # Day Tracker
-This is a desktop program designed to help you track daily statistics. Requires **Python 3** as well as some packages (run **pip install -r requirements.txt**). 
+This is a desktop program designed to help you track daily statistics. Requires **Python 3** (developed on 3.9.4) as well as some packages (run **pip install -r requirements.txt**). 
 
 Navigate to this project's directory and run **python controller.py** to execute this script.
 
