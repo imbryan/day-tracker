@@ -18,10 +18,11 @@ You can also build an executable by running **pyinstaller controller.py**. The e
 
 ### To-do
  * Web sync
+ * "Notes" column for Entries
  * Button to load backups
- * Select category from list to lookup
+ * Select category from category list to lookup
  * Better interface for creating categories, including selecting data type
- * Generate graphs for given time spans
+ * Generate graphs for given time spans (Web version only)
  * Make a streamlined executable that doesn't require convoluted instructions
  * Make it easier to jump to non-adjacent days
 
