@@ -27,5 +27,6 @@ You can also build an executable by running **pyinstaller controller.py**. The e
  * Make it easier to jump to non-adjacent days
 
 ## Known issues
+ * Value should clear after clicking "Check reminders"
  * Float values throw an exception when being read
  * Terminal runs behind GUI
