@@ -5,7 +5,7 @@ from dateutil import relativedelta
 import time
 from view import View
 from database import session, DB_FILENAME
-from setup import add_missing_columns_from_sqlalchemy_migration, populate_reminders_category_ids, populate_entries_category_ids
+from setup import add_missing_columns_from_sqlalchemy_migration, add_missing_columns_from_updates, populate_reminders_category_ids, populate_entries_category_ids
 from shutil import copyfile
 from sqlalchemy import or_
 from sqlalchemy.orm import load_only
@@ -22,9 +22,16 @@ class Controller:
             # Checking for SQLAlchemy Migration changes
             self.session.query(model.Reminder).filter(model.Reminder.category_id==1).all()
             self.session.query(model.Entry).filter(model.Entry.category_id==1).all()
+            
         except:
-            print('Running setup scripts')
+            print('Complying with SQLAlchemy Migration changes')
             add_missing_columns_from_sqlalchemy_migration(self.session)
+        try:
+            # Checking for update changes
+            self.session.query(model.Category).filter(model.Category.enabled==True).first()
+        except:
+            print('Complying with update changes')
+            add_missing_columns_from_updates(self.session)
         # Checking for NULL category_id fields
         check_reminders = self.session.query(model.Reminder).filter(model.Reminder.category_id==None).all()
         if check_reminders:
@@ -57,12 +64,12 @@ class Controller:
             self.view.date += relativedelta.relativedelta(years=1)
         elif caption == "Today":
             self.view.date = datetime.now()
-        elif caption == "Reset form":
-            self.view.cat_var.set("")
-            self.view.val_var.set("")
-            self.view.des_var.set("")
-            self.view.remind_var.set(0)
-            pass
+        # elif caption == "Reset form":
+        #     self.view.cat_var.set("")
+        #     self.view.val_var.set("")
+        #     self.view.des_var.set("")
+        #     self.view.remind_var.set(0)
+        #     pass
 
         val = self.get_value(self.view.cat_var.get().lower(), self.view.date)
         # print(f'get_value {self.view.cat_var.get().lower()} {val}')
@@ -253,26 +260,26 @@ class Controller:
                     )
                 except Exception as e:
                     self.view.popup_window("Error", e)
-        elif caption == "Toggle reminder for category":
-            boolean = self.view.remind_var.get()
-            category = self.session.query(model.Category).filter(
-                or_(model.Category.name == self.view.cat_var.get().lower(), model.Category.id == self.view.cat_var.get().lower())
-            ).first()
-            if boolean == 1 and category:
-                # self.db.write_database(self.db.conn, "insert", "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\"")  # ! Deprecated
-                # self.db.conn.commit()
-                self.session.add(model.Reminder(category_id=category.id))
-                self.session.commit()
-            elif boolean == 0 and category:
-                # self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",  # ! Deprecated
-                #                        f"\"{self.view.cat_var.get().lower()}\"")
-                # self.db.conn.commit()
-                self.session.delete(category.reminder)
-                self.session.commit()
-            elif boolean == 1 and self.view.cat_var.get().lower() == '':
-                self.view.remind_var.set(0)
+        # elif caption == "Toggle reminder for category":  # ! Deprecated -- UI Refresh
+        #     boolean = self.view.remind_var.get()
+        #     category = self.session.query(model.Category).filter(
+        #         or_(model.Category.name == self.view.cat_var.get().lower(), model.Category.id == self.view.cat_var.get().lower())
+        #     ).first()
+        #     if boolean == 1 and category:
+        #         # self.db.write_database(self.db.conn, "insert", "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\"")  # ! Deprecated
+        #         # self.db.conn.commit()
+        #         self.session.add(model.Reminder(category_id=category.id))
+        #         self.session.commit()
+        #     elif boolean == 0 and category:
+        #         # self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",  # ! Deprecated
+        #         #                        f"\"{self.view.cat_var.get().lower()}\"")
+        #         # self.db.conn.commit()
+        #         self.session.delete(category.reminder)
+        #         self.session.commit()
+        #     elif boolean == 1 and self.view.cat_var.get().lower() == '':
+        #         self.view.remind_var.set(0)
 
-        elif caption == "List of categories":
+        elif caption == "All Categories":
             message = ''
             # cats = self.db.read_database(self.db.conn, "name", "Categories", None, "string", "all")  # ! Deprecated
             cats = self.session.query(model.Category).options(load_only('name')).all()
@@ -280,16 +287,16 @@ class Controller:
                 message+=f'{cat.name}\n'
 
             self.view.popup_window("Categories", message)
-        elif caption == "Entries for this day":
-            message = ''
-            # entries = self.db.read_database(self.db.conn, "category_name, data", "Entries",  # ! Deprecated
-            #                                 f"WHERE year = {self.view.date.year} and month = {self.view.date.month} and day = {self.view.date.day}",
-            #                                 "string", "all")
-            entries = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month, day=self.view.date.day).all()
-            for entry in entries:
-                message+=f"{entry.category.name}: {entry.data}\n"
+        # elif caption == "Entries for this day": # ! Deprecated -- UI Refresh
+        #     message = ''
+        #     # entries = self.db.read_database(self.db.conn, "category_name, data", "Entries",  # ! Deprecated
+        #     #                                 f"WHERE year = {self.view.date.year} and month = {self.view.date.month} and day = {self.view.date.day}",
+        #     #                                 "string", "all")
+        #     entries = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month, day=self.view.date.day).all()
+        #     for entry in entries:
+        #         message+=f"{entry.category.name}: {entry.data}\n"
 
-            self.view.popup_window("Entries for this day", message)
+        #     self.view.popup_window("Entries for this day", message)
 
     # Get value for a category
     def get_value(self, cat, date):

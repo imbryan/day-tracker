@@ -154,12 +154,14 @@ class View(tk.Tk):
                                   )
         today_button.pack(side="top", expand=True)
 
-        # Reset button
-        caption_reset = "Reset form"
-        reset_button = ttk.Button(middle_frame, text=caption_reset, command=
-        (lambda button=caption_reset: self.controller.on_nav_button_click(caption_reset))
-                                  )
-        reset_button.pack(side="top", expand=True)
+        # TODO: Go-to-date button
+
+        # Reset button  # ! Deprecated -- UI Refresh
+        # caption_reset = "Reset form"
+        # reset_button = ttk.Button(middle_frame, text=caption_reset, command=
+        # (lambda button=caption_reset: self.controller.on_nav_button_click(caption_reset))
+        #                           )
+        # reset_button.pack(side="top", expand=True)
 
         # Right frame widgets
         caption_next = "Next Day"
@@ -240,36 +242,37 @@ class View(tk.Tk):
     def _make_extras(self):
         frame = ttk.Frame(self.main_frame)
 
-        top_top_frame = ttk.Frame(frame)
+        # top_top_frame = ttk.Frame(frame) # ! UI Refresh
         top_frame = ttk.Frame(frame)
         middle_frame = ttk.Frame(frame)
         bottom_frame = ttk.Frame(frame)
 
         # Top top frame widgets
-        caption_entries = "Entries for this day"
-        entries_button = ttk.Button(top_top_frame, text=caption_entries, command=
-        (lambda button=caption_entries: self.controller.message_button_click(caption_entries))
-                                    )
-        entries_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
-
-        caption_check_remind = "Check reminders"
-        check_remind_button = ttk.Button(top_top_frame, text=caption_check_remind, command=
-        (lambda button=caption_check_remind: self.remind(self.controller.check_reminders()))
-                                         )
-        check_remind_button.pack(side="left", expand=True)
+        # ! Deprecated -- UI Refresh
+        # caption_entries = "Entries for this day"
+        # entries_button = ttk.Button(top_top_frame, text=caption_entries, command=
+        # (lambda button=caption_entries: self.controller.message_button_click(caption_entries))
+        #                             )
+        # entries_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
         # Top frame widgets
-        caption_categories = "List of categories"
+        caption_categories = "All Categories"
         categories_button = ttk.Button(top_frame, text=caption_categories, command=
         (lambda button=caption_categories: self.controller.message_button_click(caption_categories))
                                        )
         categories_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
-        caption_delete = "Delete category"
-        delete_button = ttk.Button(top_frame, text=caption_delete, command=
-        (lambda button=caption_delete: self.delete_cat())
-                                   )
-        delete_button.pack(side="left", expand=True)
+        caption_check_remind = "Reminders"
+        check_remind_button = ttk.Button(top_frame, text=caption_check_remind, command=
+        (lambda button=caption_check_remind: self.remind(self.controller.check_reminders()))
+                                         )
+        check_remind_button.pack(side="left", expand=True)
+
+        # caption_delete = "Delete category"  # ! Deprecated -- UI Refresh
+        # delete_button = ttk.Button(top_frame, text=caption_delete, command=
+        # (lambda button=caption_delete: self.delete_cat())
+        #                            )
+        # delete_button.pack(side="left", expand=True)
 
         # Middle frame widgets
         caption_sum_month = "Sum (month)"
@@ -307,15 +310,16 @@ class View(tk.Tk):
         exit_button = ttk.Button(bottom_frame, text=caption_exit, command=self.destroy)
         exit_button.pack(side="left", expand=True)
 
-        caption_remind = "Toggle reminder for category"
-        reminder_button = ttk.Checkbutton(frame, text=caption_remind, variable=self.remind_var, onvalue=1,
-                                          offvalue=0, command=
-                                          (lambda checkbutton=caption_remind: self.controller.message_button_click(
-                                              caption_remind))
-                                          )
-        reminder_button.pack(side="top", expand=True, pady=(0,self.PAD/2))
+        # Reminder Toggle  # ! Deprecated -- UI Refresh
+        # caption_remind = "Toggle reminder for category"
+        # reminder_button = ttk.Checkbutton(frame, text=caption_remind, variable=self.remind_var, onvalue=1,
+        #                                   offvalue=0, command=
+        #                                   (lambda checkbutton=caption_remind: self.controller.message_button_click(
+        #                                       caption_remind))
+        #                                   )
+        # reminder_button.pack(side="top", expand=True, pady=(0,self.PAD/2))
 
-        top_top_frame.pack(side="top", pady=(0,self.PAD/2))
+        # top_top_frame.pack(side="top", pady=(0,self.PAD/2)) # ! UI Refresh
         top_frame.pack(side="top", pady=(0,self.PAD/2))
         middle_frame.pack(side="top", pady=(0,self.PAD/2))
         bottom_frame.pack(side="top", pady=(0,self.PAD/2))
