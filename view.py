@@ -36,7 +36,8 @@ class View(tk.Tk):
 
         self._make_main_frame()
         self._make_buttons()
-        self._make_entries()
+        self.entries_frame = None
+        self.entries_frame = self._make_entries(self.date)
         self._make_extras()
 
         self.remind(self.reminders)
@@ -188,55 +189,92 @@ class View(tk.Tk):
         frame.pack(side="top")
 
     # Buttons for data manipulation
-    def _make_entries(self):
-        frame = ttk.Frame(self.main_frame)
-        top_frame = ttk.Frame(frame)
-        bottom_frame = ttk.Frame(frame)
-        des_frame = ttk.Frame(frame)
+    def _make_entries(self, current_date):
+        frame = self.entries_frame or ttk.Frame(self.main_frame)
+        # Clear frame
+        for widget in frame.winfo_children():
+            widget.destroy()
+        # Get enabled categories
+        categories = self.session.query(model.Category).filter_by(enabled=True).all()
+        for category in categories:
+            category_frame = ttk.Frame(frame)
+            category_frame.category_id = category.id
+            category_frame.entry_text_var = tk.StringVar()
 
-        # Description frame widgets
-        des_label = ttk.Label(des_frame, text="Category description", width=20, justify="center")
-        des_label.pack(side="left", expand=True, padx=(0, self.PAD/5))
+            category_label_var = ttk.Label(category_frame, text=category.name, width=20, justify="center")
+            category_label_var.pack(side="left", expand=True)
+            category_frame.label_var = category_label_var
 
-        des_entry = ttk.Entry(des_frame, textvariable=self.des_var)
-        des_entry.pack(side="left", padx=(self.PAD, self.PAD))
+            category_entry_var = ttk.Entry(category_frame, textvariable=category_frame.entry_text_var)
+            category_entry_var.pack(side="left", expand=True, padx=(0, self.PAD/5))
+            category_frame.entry_var = category_entry_var
 
-        caption_des = "Set"
-        des_button = ttk.Button(des_frame, text=caption_des, command =
-        (lambda button=caption_des: self.controller.entry_button_click(caption_des))
-                                )
-        des_button.pack(side="left",expand=True)
+            category_frame.pack(side="top", pady=(0,self.PAD/2))
+            
+        # ! Below is deprecated - UI Refresh
+        # top_frame = ttk.Frame(frame)
+        # bottom_frame = ttk.Frame(frame)
+        # des_frame = ttk.Frame(frame)
 
-        # Top frame widgets
-        cat_label = ttk.Label(top_frame, text="Lookup category", width=17, justify="center")
-        cat_label.pack(side="left",expand=True, padx=(self.PAD, self.PAD))
+        # # Description frame widgets
+        # des_label = ttk.Label(des_frame, text="Category description", width=20, justify="center")
+        # des_label.pack(side="left", expand=True, padx=(0, self.PAD/5))
 
-        cat_entry = ttk.Entry(top_frame, textvariable=self.cat_var)
-        cat_entry.pack(side="left",expand=True, padx=(self.PAD, self.PAD))
+        # des_entry = ttk.Entry(des_frame, textvariable=self.des_var)
+        # des_entry.pack(side="left", padx=(self.PAD, self.PAD))
 
-        caption_lookup = "Lookup"
-        lookup_button = ttk.Button(top_frame, text=caption_lookup, command =
-        (lambda button=caption_lookup: self.controller.entry_button_click(caption_lookup))
-                                   )
-        lookup_button.pack(side="left",expand=True)
+        # caption_des = "Set"
+        # des_button = ttk.Button(des_frame, text=caption_des, command =
+        # (lambda button=caption_des: self.controller.entry_button_click(caption_des))
+        #                         )
+        # des_button.pack(side="left",expand=True)
 
-        # Bottom frame widgets
-        val_label = ttk.Label(bottom_frame, text="View/change value", width=17, justify="center")
-        val_label.pack(side="left", expand=True, padx=(self.PAD, self.PAD))
+        # # Top frame widgets
+        # cat_label = ttk.Label(top_frame, text="Lookup category", width=17, justify="center")
+        # cat_label.pack(side="left",expand=True, padx=(self.PAD, self.PAD))
 
-        val_entry = ttk.Entry(bottom_frame, textvariable=self.val_var)
-        val_entry.pack(side="left", padx=(self.PAD, self.PAD))
+        # cat_entry = ttk.Entry(top_frame, textvariable=self.cat_var)
+        # cat_entry.pack(side="left",expand=True, padx=(self.PAD, self.PAD))
 
-        caption_update = "Update"
-        update_button = ttk.Button(bottom_frame, text=caption_update, command=
-        (lambda button=caption_update: self.controller.entry_button_click(caption_update))
-                                   )
-        update_button.pack(side="left", expand=True)
+        # caption_lookup = "Lookup"
+        # lookup_button = ttk.Button(top_frame, text=caption_lookup, command =
+        # (lambda button=caption_lookup: self.controller.entry_button_click(caption_lookup))
+        #                            )
+        # lookup_button.pack(side="left",expand=True)
 
-        des_frame.pack(side="top", pady=(0,self.PAD/2))
-        top_frame.pack(side="top", pady=(0,self.PAD/4))
-        bottom_frame.pack(side="top")
+        # # Bottom frame widgets
+        # val_label = ttk.Label(bottom_frame, text="View/change value", width=17, justify="center")
+        # val_label.pack(side="left", expand=True, padx=(self.PAD, self.PAD))
+
+        # val_entry = ttk.Entry(bottom_frame, textvariable=self.val_var)
+        # val_entry.pack(side="left", padx=(self.PAD, self.PAD))
+
+        # caption_update = "Update"
+        # update_button = ttk.Button(bottom_frame, text=caption_update, command=
+        # (lambda button=caption_update: self.controller.entry_button_click(caption_update))
+        #                            )
+        # update_button.pack(side="left", expand=True)
+
+        # des_frame.pack(side="top", pady=(0,self.PAD/2))
+        # top_frame.pack(side="top", pady=(0,self.PAD/4))
+        # bottom_frame.pack(side="top")
+        ####################
+        
+        ttk.Button(frame, text="Save All", command=(lambda button="Save All": self.controller.entry_button_click("Save All"))).pack(side="top", expand=True)
+
         frame.pack(side="top", pady=(self.PAD,self.PAD))
+        for widget in frame.winfo_children():
+            if isinstance(widget, ttk.Frame) == False:
+                continue
+            entry_for_current_date = self.session.query(model.Entry).filter(
+                model.Entry.year==current_date.year,
+                model.Entry.month==current_date.month,
+                model.Entry.day==current_date.day,
+                model.Entry.category_id==widget.category_id
+            ).first()
+            if entry_for_current_date:
+                widget.entry_text_var.set(entry_for_current_date.data)
+        return frame
 
     # Extras buttons
     def _make_extras(self):

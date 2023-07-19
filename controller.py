@@ -159,6 +159,9 @@ class Controller:
             if self.view.cat_var.get() != '':
                 self.set_description(self.view.des_var.get(), self.view.cat_var.get().lower())
                 self.view.popup_window("Alert", f"Category description has been set to\n\"{self.view.des_var.get()}\"")
+        elif caption == "Save All":
+            # TODO
+            self.view.popup_window("Alert", "This feature is still being built.")
 
     # Extras buttons
     def message_button_click(self, caption):
