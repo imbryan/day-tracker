@@ -209,6 +209,9 @@ class View(tk.Tk):
             category_entry_var.pack(side="left", expand=True, padx=(0, self.PAD/5))
             category_frame.entry_var = category_entry_var
 
+            category_disable_button = ttk.Button(category_frame, text="Disable")  # TODO this button needs to work
+            category_disable_button.pack(side="left", expand=True, padx=(self.PAD/5, 0))
+
             category_frame.pack(side="top", pady=(0,self.PAD/2))
             
         # ! Below is deprecated - UI Refresh
@@ -312,26 +315,28 @@ class View(tk.Tk):
         #                            )
         # delete_button.pack(side="left", expand=True)
 
+        # TODO - Function buttons are broken as of UI Refresh
         # Middle frame widgets
-        caption_sum_month = "Sum (month)"
-        sum_month_button = ttk.Button(middle_frame, text=caption_sum_month, command=
-        (lambda button=caption_sum_month: self.controller.message_button_click(caption_sum_month)))
-        sum_month_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
+        # caption_sum_month = "Sum (month)"
+        # sum_month_button = ttk.Button(middle_frame, text=caption_sum_month, command=
+        # (lambda button=caption_sum_month: self.controller.message_button_click(caption_sum_month)))
+        # sum_month_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
-        caption_sum_year = "Sum (year)"
-        sum_year_button = ttk.Button(middle_frame, text=caption_sum_year, command=
-        (lambda button=caption_sum_year: self.controller.message_button_click(caption_sum_year)))
-        sum_year_button.pack(side="left", expand=True)
+        # caption_sum_year = "Sum (year)"
+        # sum_year_button = ttk.Button(middle_frame, text=caption_sum_year, command=
+        # (lambda button=caption_sum_year: self.controller.message_button_click(caption_sum_year)))
+        # sum_year_button.pack(side="left", expand=True)
 
-        caption_average_month = "Average (month)"
-        average_month_button = ttk.Button(middle_frame, text=caption_average_month, command=
-        (lambda button=caption_average_month: self.controller.message_button_click(caption_average_month)))
-        average_month_button.pack(side="left", expand=True)
+        # caption_average_month = "Average (month)"
+        # average_month_button = ttk.Button(middle_frame, text=caption_average_month, command=
+        # (lambda button=caption_average_month: self.controller.message_button_click(caption_average_month)))
+        # average_month_button.pack(side="left", expand=True)
 
-        caption_average_year = "Average (year)"
-        average_year_button = ttk.Button(middle_frame, text=caption_average_year, command=
-        (lambda button=caption_average_year: self.controller.message_button_click(caption_average_year)))
-        average_year_button.pack(side="left", expand=True)
+        # caption_average_year = "Average (year)"
+        # average_year_button = ttk.Button(middle_frame, text=caption_average_year, command=
+        # (lambda button=caption_average_year: self.controller.message_button_click(caption_average_year)))
+        # average_year_button.pack(side="left", expand=True)
+        ### end 
 
         # Bottom frame widgets
         caption_help = "Help"

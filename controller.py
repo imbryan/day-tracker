@@ -71,21 +71,24 @@ class Controller:
         #     self.view.remind_var.set(0)
         #     pass
 
-        val = self.get_value(self.view.cat_var.get().lower(), self.view.date)
+        # ! Below is deprecated - UI Refresh
+        # val = self.get_value(self.view.cat_var.get().lower(), self.view.date)
         # print(f'get_value {self.view.cat_var.get().lower()} {val}')
-        if val is not None:
-            self.view.val_var.set(val)
-        else:
-            self.view.val_var.set("")
+        # if val is not None:
+        #     self.view.val_var.set(val)
+        # else:
+        #     self.view.val_var.set("")
         if self.get_reminder_status(self.view.cat_var.get().lower()) is not None:
             self.view.remind_var.set(1)
         else:
             self.view.remind_var.set(0)
-        des = self.get_description(self.view.cat_var.get().lower())
-        if des is not None:
-            self.view.des_var.set(des)
-        else:
-            self.view.des_var.set("")
+        # des = self.get_description(self.view.cat_var.get().lower())
+        # if des is not None:
+        #     self.view.des_var.set(des)
+        # else:
+        #     self.view.des_var.set("")
+        # ! end deprecation
+        self.view.entries_frame = self.view._make_entries(self.view.date)
 
         self.view.current_day.set(f'{self.view.date.month} / {self.view.date.day} / {self.view.date.year}')
         # print(f'{caption} has been pressed')
@@ -161,6 +164,9 @@ class Controller:
                 self.view.popup_window("Alert", f"Category description has been set to\n\"{self.view.des_var.get()}\"")
         elif caption == "Save All":
             # TODO
+            for widget in self.view.entries_frame.winfo_children():
+                if getattr(widget, 'category_id', None):
+                    self.set_cat_value(widget.category_id, self.view.date, widget.entry_text_var.get())
             self.view.popup_window("Alert", "This feature is still being built.")
 
     # Extras buttons
