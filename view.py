@@ -76,7 +76,7 @@ class View(tk.Tk):
             if new_list:
 
                 top = tk.Toplevel(self)
-                top.wm_geometry("250x175")
+                # top.wm_geometry("250x175")
                 top.title("Reminder")
 
                 msg = "You need to fill in this day's values for:\n\n"
@@ -84,11 +84,11 @@ class View(tk.Tk):
                 for item in new_list:
                     msg+=(item+"\n")
 
-                message = tk.Message(top, text=msg, pady=(self.PAD))
-                message.pack(expand=True)
+                message = tk.Message(top, text=msg)
+                message.pack(expand=True, pady=(self.PAD), padx=(self.PAD))
 
-                button = tk.Button(top, text="Dismiss", pady=(self.PAD), command=lambda: self.destroy_top(top))
-                button.pack(expand=True)
+                button = tk.Button(top, text="Dismiss", command=lambda: self.destroy_top(top))
+                button.pack(expand=True, pady=(self.PAD))
 
                 self.cat_var.set(new_list[0])
                 self.des_var.set(self.controller.get_description(new_list[0]))
@@ -128,6 +128,20 @@ class View(tk.Tk):
 
         category_create_button = ttk.Button(top, text="Submit", command=lambda: self.controller.create_category(top))
         category_create_button.pack(expand=True, side="left", padx=(self.PAD/2,self.PAD))
+
+    def toggle_reminder(self):
+        top = tk.Toplevel(self)
+        self.toggle_reminder_var = tk.StringVar()
+        top.title = "Reminder"
+
+        reminder_label = ttk.Label(top, text="Category Name")
+        reminder_label.pack(expand=True, side="left", padx=(self.PAD,0), pady=(self.PAD*2.5))
+
+        reminder_entry = ttk.Entry(top, textvariable=self.toggle_reminder_var)
+        reminder_entry.pack(expand=True, side="left")
+
+        reminder_toggle_button = ttk.Button(top, text="Submit", command=lambda: self.controller.toggle_reminder(top))
+        reminder_toggle_button.pack(expand=True, side="left", padx=(self.PAD/2, self.PAD))
 
     def destroy_top(self, top):
         top.destroy()
@@ -342,6 +356,11 @@ class View(tk.Tk):
         (lambda button=caption_check_remind: self.remind(self.controller.check_reminders()))
                                          )
         check_remind_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
+
+        caption_toggle_remind = "Toggle Reminder"
+        toggle_remind_button = ttk.Button(top_frame, text=caption_toggle_remind, command=
+        (lambda button=caption_toggle_remind: self.toggle_reminder()))
+        toggle_remind_button.pack(side="left", expand=True)
 
 
         # caption_delete = "Delete category"  # ! Deprecated -- UI Refresh

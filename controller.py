@@ -424,7 +424,7 @@ class Controller:
             self.view.popup_window("Error", e)
 
     def create_category(self, top):
-        name = self.view.new_cat_name_var.get()
+        name = self.view.new_cat_name_var.get().lower()
         check_if_exists = self.session.query(model.Category).filter_by(name=name).first()
         type_dict = {
             'Number': 'float',
@@ -447,6 +447,24 @@ class Controller:
             self.view.popup_window("Alert", "Please enter a category name.")
         else:
             self.view.popup_window("Alert", "Error creating new category.")
+
+    def toggle_reminder(self, top):
+        category_name = self.view.toggle_reminder_var.get().lower()
+        category = self.session.query(model.Category).filter_by(name=category_name).first()
+        if category:
+            reminder = self.session.query(model.Reminder).filter(or_(model.Reminder.category_name==category.name, model.Reminder.category_id==category.id)).first()
+            if not reminder:
+                self.session.add(model.Reminder(category_id=category.id))
+                self.view.popup_window("Success", f"Reminder created for \"{category_name}\"")
+            else:
+                # print("reminder exists")
+                self.session.delete(reminder)
+                self.view.popup_window("Success", f"Reminder deleted for \"{category_name}\"")
+            self.session.commit()
+            top.destroy()
+        else:
+            self.view.popup_window("Alert", "Please enter a valid category name.")
+
 
 
 if __name__ == '__main__':
