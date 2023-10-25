@@ -17,6 +17,20 @@ def add_missing_columns_from_sqlalchemy_migration(session):
     print('SETUP: added missing columns from SQLAlchemy migration')
 
 
+def add_missing_columns_from_updates(session):
+    # UI Refresh update
+    try:
+        session.execute("ALTER TABLE Categories ADD COLUMN enabled integer")
+        categories = session.query(model.Category).all()
+        for category in categories:
+            category.enabled = True
+    except:
+        print("Error executing ALTER TABLE statement for Categories.enabled")
+    ### Future updates ###
+    session.commit()
+    print('SETUP: added missing columns')
+
+
 def populate_reminders_category_ids(session, reminders):
     count = 0
     for reminder in reminders:

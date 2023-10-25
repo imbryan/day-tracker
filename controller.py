@@ -5,7 +5,7 @@ from dateutil import relativedelta
 import time
 from view import View
 from database import session, DB_FILENAME
-from setup import add_missing_columns_from_sqlalchemy_migration, populate_reminders_category_ids, populate_entries_category_ids
+from setup import add_missing_columns_from_sqlalchemy_migration, add_missing_columns_from_updates, populate_reminders_category_ids, populate_entries_category_ids
 from shutil import copyfile
 from sqlalchemy import or_
 from sqlalchemy.orm import load_only
@@ -22,9 +22,16 @@ class Controller:
             # Checking for SQLAlchemy Migration changes
             self.session.query(model.Reminder).filter(model.Reminder.category_id==1).all()
             self.session.query(model.Entry).filter(model.Entry.category_id==1).all()
+            
         except:
-            print('Running setup scripts')
+            print('Complying with SQLAlchemy Migration changes')
             add_missing_columns_from_sqlalchemy_migration(self.session)
+        try:
+            # Checking for update changes
+            self.session.query(model.Category).filter(model.Category.enabled==True).first()
+        except:
+            print('Complying with update changes')
+            add_missing_columns_from_updates(self.session)
         # Checking for NULL category_id fields
         check_reminders = self.session.query(model.Reminder).filter(model.Reminder.category_id==None).all()
         if check_reminders:
@@ -57,28 +64,31 @@ class Controller:
             self.view.date += relativedelta.relativedelta(years=1)
         elif caption == "Today":
             self.view.date = datetime.now()
-        elif caption == "Reset form":
-            self.view.cat_var.set("")
-            self.view.val_var.set("")
-            self.view.des_var.set("")
-            self.view.remind_var.set(0)
-            pass
+        # elif caption == "Reset form":
+        #     self.view.cat_var.set("")
+        #     self.view.val_var.set("")
+        #     self.view.des_var.set("")
+        #     self.view.remind_var.set(0)
+        #     pass
 
-        val = self.get_value(self.view.cat_var.get().lower(), self.view.date)
+        # ! Below is deprecated - UI Refresh
+        # val = self.get_value(self.view.cat_var.get().lower(), self.view.date)
         # print(f'get_value {self.view.cat_var.get().lower()} {val}')
-        if val is not None:
-            self.view.val_var.set(val)
-        else:
-            self.view.val_var.set("")
+        # if val is not None:
+        #     self.view.val_var.set(val)
+        # else:
+        #     self.view.val_var.set("")
         if self.get_reminder_status(self.view.cat_var.get().lower()) is not None:
             self.view.remind_var.set(1)
         else:
             self.view.remind_var.set(0)
-        des = self.get_description(self.view.cat_var.get().lower())
-        if des is not None:
-            self.view.des_var.set(des)
-        else:
-            self.view.des_var.set("")
+        # des = self.get_description(self.view.cat_var.get().lower())
+        # if des is not None:
+        #     self.view.des_var.set(des)
+        # else:
+        #     self.view.des_var.set("")
+        # ! end deprecation
+        self.view.entries_frame = self.view._make_entries(self.view.date)
 
         self.view.current_day.set(f'{self.view.date.month} / {self.view.date.day} / {self.view.date.year}')
         # print(f'{caption} has been pressed')
@@ -152,16 +162,34 @@ class Controller:
             if self.view.cat_var.get() != '':
                 self.set_description(self.view.des_var.get(), self.view.cat_var.get().lower())
                 self.view.popup_window("Alert", f"Category description has been set to\n\"{self.view.des_var.get()}\"")
+        elif caption == "Save All":
+            for widget in self.view.entries_frame.winfo_children():
+                if getattr(widget, 'category_id', None):
+                    self.set_cat_value(widget.category_id, self.view.date, widget.entry_text_var.get())
+            self.view.popup_window("Success", "All entries have been updated.")
+
+    def toggle_cat(self):
+        name = View.input_window("Categories", "Which category would you like to toggle?")
+        if name:
+            category = self.session.query(model.Category).filter(model.Category.name.ilike(name)).first()
+        else:
+            category = None
+        if category:
+            category.enabled = not category.enabled
+            self.session.commit()
+            info_text = 'shown' if category.enabled else 'hidden'
+            View.popup_window("Success", f"Category \"{category.name}\" is now {info_text}.")
+            self.view.entries_frame = self.view._make_entries(current_date=self.view.date)
+        elif name:
+            View.popup_window("Alert", f"Category \"{name}\" was not found.")
+
 
     # Extras buttons
     def message_button_click(self, caption):
         if caption=="Help":
             self.view.popup_window("Help",
-                          "This program shows you one day's entry at a time.\n\n"
-                          "In the middle text box, type in a \"category\" of data whose entry you would like to create or view.\n"
-                          "The lower text box will be used to enter a corresponding data value (pressing \"Lookup\" above will make the lower box show any existing value)\n\n"
-                          "You can enter any combination of Category and Data value, press \"Update\",\n"
-                          "and it will write (or overwrite) the entry for the selected day."
+                          "This program lets you browse your entries across days.\n\n"
+                          "Repository\thttps://github.com/imbryan/day-tracker"
                                    )
         elif caption=="Sum (month)":
             if self.view.cat_var.get() != '':  # if there is valid input
@@ -253,26 +281,26 @@ class Controller:
                     )
                 except Exception as e:
                     self.view.popup_window("Error", e)
-        elif caption == "Toggle reminder for category":
-            boolean = self.view.remind_var.get()
-            category = self.session.query(model.Category).filter(
-                or_(model.Category.name == self.view.cat_var.get().lower(), model.Category.id == self.view.cat_var.get().lower())
-            ).first()
-            if boolean == 1 and category:
-                # self.db.write_database(self.db.conn, "insert", "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\"")  # ! Deprecated
-                # self.db.conn.commit()
-                self.session.add(model.Reminder(category_id=category.id))
-                self.session.commit()
-            elif boolean == 0 and category:
-                # self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",  # ! Deprecated
-                #                        f"\"{self.view.cat_var.get().lower()}\"")
-                # self.db.conn.commit()
-                self.session.delete(category.reminder)
-                self.session.commit()
-            elif boolean == 1 and self.view.cat_var.get().lower() == '':
-                self.view.remind_var.set(0)
+        # elif caption == "Toggle reminder for category":  # ! Deprecated -- UI Refresh
+        #     boolean = self.view.remind_var.get()
+        #     category = self.session.query(model.Category).filter(
+        #         or_(model.Category.name == self.view.cat_var.get().lower(), model.Category.id == self.view.cat_var.get().lower())
+        #     ).first()
+        #     if boolean == 1 and category:
+        #         # self.db.write_database(self.db.conn, "insert", "Reminders", "category_name", f"\"{self.view.cat_var.get().lower()}\"")  # ! Deprecated
+        #         # self.db.conn.commit()
+        #         self.session.add(model.Reminder(category_id=category.id))
+        #         self.session.commit()
+        #     elif boolean == 0 and category:
+        #         # self.db.write_database(self.db.conn, "delete", "Reminders", "category_name",  # ! Deprecated
+        #         #                        f"\"{self.view.cat_var.get().lower()}\"")
+        #         # self.db.conn.commit()
+        #         self.session.delete(category.reminder)
+        #         self.session.commit()
+        #     elif boolean == 1 and self.view.cat_var.get().lower() == '':
+        #         self.view.remind_var.set(0)
 
-        elif caption == "List of categories":
+        elif caption == "All Categories":
             message = ''
             # cats = self.db.read_database(self.db.conn, "name", "Categories", None, "string", "all")  # ! Deprecated
             cats = self.session.query(model.Category).options(load_only('name')).all()
@@ -280,16 +308,16 @@ class Controller:
                 message+=f'{cat.name}\n'
 
             self.view.popup_window("Categories", message)
-        elif caption == "Entries for this day":
-            message = ''
-            # entries = self.db.read_database(self.db.conn, "category_name, data", "Entries",  # ! Deprecated
-            #                                 f"WHERE year = {self.view.date.year} and month = {self.view.date.month} and day = {self.view.date.day}",
-            #                                 "string", "all")
-            entries = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month, day=self.view.date.day).all()
-            for entry in entries:
-                message+=f"{entry.category.name}: {entry.data}\n"
+        # elif caption == "Entries for this day": # ! Deprecated -- UI Refresh
+        #     message = ''
+        #     # entries = self.db.read_database(self.db.conn, "category_name, data", "Entries",  # ! Deprecated
+        #     #                                 f"WHERE year = {self.view.date.year} and month = {self.view.date.month} and day = {self.view.date.day}",
+        #     #                                 "string", "all")
+        #     entries = self.session.query(model.Entry).filter_by(year=self.view.date.year, month=self.view.date.month, day=self.view.date.day).all()
+        #     for entry in entries:
+        #         message+=f"{entry.category.name}: {entry.data}\n"
 
-            self.view.popup_window("Entries for this day", message)
+        #     self.view.popup_window("Entries for this day", message)
 
     # Get value for a category
     def get_value(self, cat, date):
@@ -394,6 +422,49 @@ class Controller:
             self.view.popup_window("Success", f"Backup created at \"backups/{name}.db\"")
         except Exception as e:
             self.view.popup_window("Error", e)
+
+    def create_category(self, top):
+        name = self.view.new_cat_name_var.get().lower()
+        check_if_exists = self.session.query(model.Category).filter_by(name=name).first()
+        type_dict = {
+            'Number': 'float',
+            'Text': 'string',
+            'Time': 'time'
+        }
+        cat_type = type_dict.get(self.view.new_cat_type_var.get())
+        if name and cat_type and (check_if_exists == None):
+            category = model.Category(name=name, type=cat_type)
+            self.session.add(category)
+            self.session.commit()
+            self.view.popup_window("Success", f"Category \"{name}\" has been created.")
+            self.view.entries_frame = self.view._make_entries(self.view.date)
+            top.destroy()
+        elif check_if_exists:
+            self.view.popup_window("Alert", "Category already exists.")
+        elif not cat_type:
+            self.view.popup_window("Alert", "Please select a category type.")
+        elif not name:
+            self.view.popup_window("Alert", "Please enter a category name.")
+        else:
+            self.view.popup_window("Alert", "Error creating new category.")
+
+    def toggle_reminder(self, top):
+        category_name = self.view.toggle_reminder_var.get().lower()
+        category = self.session.query(model.Category).filter_by(name=category_name).first()
+        if category:
+            reminder = self.session.query(model.Reminder).filter(or_(model.Reminder.category_name==category.name, model.Reminder.category_id==category.id)).first()
+            if not reminder:
+                self.session.add(model.Reminder(category_id=category.id))
+                self.view.popup_window("Success", f"Reminder created for \"{category_name}\"")
+            else:
+                # print("reminder exists")
+                self.session.delete(reminder)
+                self.view.popup_window("Success", f"Reminder deleted for \"{category_name}\"")
+            self.session.commit()
+            top.destroy()
+        else:
+            self.view.popup_window("Alert", "Please enter a valid category name.")
+
 
 
 if __name__ == '__main__':

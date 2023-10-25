@@ -1,6 +1,6 @@
 from database import Base, session
 import datetime
-from sqlalchemy import Column, Integer, Text, ForeignKey, BigInteger, or_, case, func, select
+from sqlalchemy import Column, Integer, Text, ForeignKey, BigInteger, Boolean, or_, case, func, select
 from sqlalchemy.orm import relationship, load_only
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -18,6 +18,7 @@ class Category(Base):
     name = Column(Text, unique=True)
     type = Column(Text)
     description = Column(Text)
+    enabled = Column(Boolean, default=True)
 
     reminder = relationship("Reminder", uselist=False, back_populates="category")
 
