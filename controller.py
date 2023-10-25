@@ -168,13 +168,20 @@ class Controller:
                     self.set_cat_value(widget.category_id, self.view.date, widget.entry_text_var.get())
             self.view.popup_window("Success", "All entries have been updated.")
 
-    def disable_cat(self, category_id, frame):
-        category = self.session.query(model.Category).filter_by(id=category_id).first()
+    def toggle_cat(self):
+        name = View.input_window("Categories", "Which category would you like to toggle?")
+        if name:
+            category = self.session.query(model.Category).filter(model.Category.name.ilike(name)).first()
+        else:
+            category = None
         if category:
-            category.enabled = False
+            category.enabled = not category.enabled
             self.session.commit()
-
-            frame.destroy()
+            info_text = 'shown' if category.enabled else 'hidden'
+            View.popup_window("Success", f"Category \"{category.name}\" is now {info_text}.")
+            self.view.entries_frame = self.view._make_entries(current_date=self.view.date)
+        elif name:
+            View.popup_window("Alert", f"Category \"{name}\" was not found.")
 
 
     # Extras buttons

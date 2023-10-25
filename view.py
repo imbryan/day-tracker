@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk  # More native looking widgets
 from tkinter.messagebox import showinfo, askyesno
+from tkinter.simpledialog import askstring
 import datetime
 import model
 from sqlalchemy import or_
@@ -210,10 +211,11 @@ class View(tk.Tk):
             category_entry_var.pack(side="left", expand=True, padx=(0, self.PAD/5))
             category_frame.entry_var = category_entry_var
 
-            # TODO cant get this to work
+            # ! I Give Up, Gonna Try Something Else.
             # category_disable_button = ttk.Button(category_frame, text=temp_caption_var,command=
             # (lambda: self.controller.disable_cat(category_frame.category_id,category_frame)))
             # category_disable_button.pack(side="left", expand=True, padx=(self.PAD/5, 0))
+            ####
 
             category_frame.pack(side="top", pady=(0,self.PAD/2))
             
@@ -310,7 +312,11 @@ class View(tk.Tk):
         check_remind_button = ttk.Button(top_frame, text=caption_check_remind, command=
         (lambda button=caption_check_remind: self.remind(self.controller.check_reminders()))
                                          )
-        check_remind_button.pack(side="left", expand=True)
+        check_remind_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
+
+        caption_toggle_category = "Show/Hide Category"
+        toggle_cat_button = ttk.Button(top_frame, text=caption_toggle_category, command=self.controller.toggle_cat)
+        toggle_cat_button.pack(side="left", expand=True)
 
         # caption_delete = "Delete category"  # ! Deprecated -- UI Refresh
         # delete_button = ttk.Button(top_frame, text=caption_delete, command=
@@ -340,6 +346,8 @@ class View(tk.Tk):
         # (lambda button=caption_average_year: self.controller.message_button_click(caption_average_year)))
         # average_year_button.pack(side="left", expand=True)
         ### end 
+
+
 
         # Bottom frame widgets
         caption_help = "Help"
@@ -374,6 +382,10 @@ class View(tk.Tk):
     @staticmethod
     def popup_window(title, message):
         showinfo(title, message)
+
+    @staticmethod
+    def input_window(title, message):
+        return askstring(title, message)
 
     def delete_cat(self):
         cat = self.cat_var.get().lower()
