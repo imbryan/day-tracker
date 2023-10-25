@@ -200,6 +200,7 @@ class View(tk.Tk):
             category_frame = ttk.Frame(frame)
             category_frame.category_id = category.id
             category_frame.entry_text_var = tk.StringVar()
+            temp_caption_var = "Disable"
 
             category_label_var = ttk.Label(category_frame, text=category.name, width=20, justify="center")
             category_label_var.pack(side="left", expand=True)
@@ -209,8 +210,10 @@ class View(tk.Tk):
             category_entry_var.pack(side="left", expand=True, padx=(0, self.PAD/5))
             category_frame.entry_var = category_entry_var
 
-            category_disable_button = ttk.Button(category_frame, text="Disable")  # TODO this button needs to work
-            category_disable_button.pack(side="left", expand=True, padx=(self.PAD/5, 0))
+            # TODO cant get this to work
+            # category_disable_button = ttk.Button(category_frame, text=temp_caption_var,command=
+            # (lambda: self.controller.disable_cat(category_frame.category_id,category_frame)))
+            # category_disable_button.pack(side="left", expand=True, padx=(self.PAD/5, 0))
 
             category_frame.pack(side="top", pady=(0,self.PAD/2))
             

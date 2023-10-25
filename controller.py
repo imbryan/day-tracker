@@ -163,11 +163,19 @@ class Controller:
                 self.set_description(self.view.des_var.get(), self.view.cat_var.get().lower())
                 self.view.popup_window("Alert", f"Category description has been set to\n\"{self.view.des_var.get()}\"")
         elif caption == "Save All":
-            # TODO
             for widget in self.view.entries_frame.winfo_children():
                 if getattr(widget, 'category_id', None):
                     self.set_cat_value(widget.category_id, self.view.date, widget.entry_text_var.get())
-            self.view.popup_window("Alert", "This feature is still being built.")
+            self.view.popup_window("Success", "All entries have been updated.")
+
+    def disable_cat(self, category_id, frame):
+        category = self.session.query(model.Category).filter_by(id=category_id).first()
+        if category:
+            category.enabled = False
+            self.session.commit()
+
+            frame.destroy()
+
 
     # Extras buttons
     def message_button_click(self, caption):
