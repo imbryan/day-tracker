@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk  # More native looking widgets
+from tkinter import ttk, OptionMenu  # More native looking widgets
 from tkinter.messagebox import showinfo, askyesno
 from tkinter.simpledialog import askstring
 import datetime
@@ -69,7 +69,7 @@ class View(tk.Tk):
                         model.Entry.month==self.date.month, 
                         model.Entry.day==self.date.day,
                     ).first()
-            if not check_todays_entry or check_todays_entry.data is None:
+            if not check_todays_entry or check_todays_entry.data in (None, ''):
                 new_list.append(item)
 
         try:
@@ -109,6 +109,25 @@ class View(tk.Tk):
 
         backup_button = ttk.Button(top, text="Backup", command=lambda: self.controller.backup(top))
         backup_button.pack(expand=True, side="left")
+
+    def create_category(self):
+        top = tk.Toplevel(self)
+        self.new_cat_name_var = tk.StringVar()
+        top.title="New Category"
+
+        category_label = ttk.Label(top, text="Category Name")
+        category_label.pack(expand=True, side="left", padx=(self.PAD,0), pady=(self.PAD*2.5))
+
+        category_name = ttk.Entry(top, textvariable=self.new_cat_name_var)
+        category_name.pack(expand=True, side="left")
+
+        self.new_cat_type_var = tk.StringVar()
+        options_list = ['Number', 'Text', 'Time']
+        category_menu = OptionMenu(top, self.new_cat_type_var, *options_list)
+        category_menu.pack(expand=True, side="left")
+
+        category_create_button = ttk.Button(top, text="Submit", command=lambda: self.controller.create_category(top))
+        category_create_button.pack(expand=True, side="left", padx=(self.PAD/2,self.PAD))
 
     def destroy_top(self, top):
         top.destroy()
@@ -268,7 +287,6 @@ class View(tk.Tk):
         # bottom_frame.pack(side="top")
         ####################
         
-        ttk.Button(frame, text="Save All", command=(lambda button="Save All": self.controller.entry_button_click("Save All"))).pack(side="top", expand=True)
 
         frame.pack(side="top", pady=(self.PAD,self.PAD))
         for widget in frame.winfo_children():
@@ -288,7 +306,7 @@ class View(tk.Tk):
     def _make_extras(self):
         frame = ttk.Frame(self.main_frame)
 
-        # top_top_frame = ttk.Frame(frame) # ! UI Refresh
+        top_top_frame = ttk.Frame(frame) # ! Changed in UI Refresh
         top_frame = ttk.Frame(frame)
         middle_frame = ttk.Frame(frame)
         bottom_frame = ttk.Frame(frame)
@@ -301,6 +319,13 @@ class View(tk.Tk):
         #                             )
         # entries_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
+        caption_create_category = "Create Category"
+        create_category_button = ttk.Button(top_top_frame, text=caption_create_category, command=
+        (lambda button=caption_create_category: self.create_category()))
+        create_category_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
+
+        ttk.Button(top_top_frame, text="Save All", command=(lambda button="Save All": self.controller.entry_button_click("Save All"))).pack(side="top", expand=True)
+
         # Top frame widgets
         caption_categories = "All Categories"
         categories_button = ttk.Button(top_frame, text=caption_categories, command=
@@ -308,15 +333,16 @@ class View(tk.Tk):
                                        )
         categories_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
+        caption_toggle_category = "Show/Hide Category"
+        toggle_cat_button = ttk.Button(top_frame, text=caption_toggle_category, command=self.controller.toggle_cat)
+        toggle_cat_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
+
         caption_check_remind = "Reminders"
         check_remind_button = ttk.Button(top_frame, text=caption_check_remind, command=
         (lambda button=caption_check_remind: self.remind(self.controller.check_reminders()))
                                          )
         check_remind_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
-        caption_toggle_category = "Show/Hide Category"
-        toggle_cat_button = ttk.Button(top_frame, text=caption_toggle_category, command=self.controller.toggle_cat)
-        toggle_cat_button.pack(side="left", expand=True)
 
         # caption_delete = "Delete category"  # ! Deprecated -- UI Refresh
         # delete_button = ttk.Button(top_frame, text=caption_delete, command=
@@ -355,7 +381,7 @@ class View(tk.Tk):
         (lambda button=caption_help: self.controller.message_button_click(caption_help)))
         help_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
-        caption_backup = "Create backup"
+        caption_backup = "Create Backup"
         backup_button = ttk.Button(bottom_frame, text=caption_backup, command=
         (lambda button=caption_backup: self.backup()))
         backup_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
@@ -373,7 +399,7 @@ class View(tk.Tk):
         #                                   )
         # reminder_button.pack(side="top", expand=True, pady=(0,self.PAD/2))
 
-        # top_top_frame.pack(side="top", pady=(0,self.PAD/2)) # ! UI Refresh
+        top_top_frame.pack(side="top", pady=(0,self.PAD/2)) # ! Changed in UI Refresh
         top_frame.pack(side="top", pady=(0,self.PAD/2))
         middle_frame.pack(side="top", pady=(0,self.PAD/2))
         bottom_frame.pack(side="top", pady=(0,self.PAD/2))

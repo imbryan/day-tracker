@@ -188,11 +188,8 @@ class Controller:
     def message_button_click(self, caption):
         if caption=="Help":
             self.view.popup_window("Help",
-                          "This program shows you one day's entry at a time.\n\n"
-                          "In the middle text box, type in a \"category\" of data whose entry you would like to create or view.\n"
-                          "The lower text box will be used to enter a corresponding data value (pressing \"Lookup\" above will make the lower box show any existing value)\n\n"
-                          "You can enter any combination of Category and Data value, press \"Update\",\n"
-                          "and it will write (or overwrite) the entry for the selected day."
+                          "This program lets you browse your entries across days.\n\n"
+                          "Repository\thttps://github.com/imbryan/day-tracker"
                                    )
         elif caption=="Sum (month)":
             if self.view.cat_var.get() != '':  # if there is valid input
@@ -425,6 +422,31 @@ class Controller:
             self.view.popup_window("Success", f"Backup created at \"backups/{name}.db\"")
         except Exception as e:
             self.view.popup_window("Error", e)
+
+    def create_category(self, top):
+        name = self.view.new_cat_name_var.get()
+        check_if_exists = self.session.query(model.Category).filter_by(name=name).first()
+        type_dict = {
+            'Number': 'float',
+            'Text': 'string',
+            'Time': 'time'
+        }
+        cat_type = type_dict.get(self.view.new_cat_type_var.get())
+        if name and cat_type and (check_if_exists == None):
+            category = model.Category(name=name, type=cat_type)
+            self.session.add(category)
+            self.session.commit()
+            self.view.popup_window("Success", f"Category \"{name}\" has been created.")
+            self.view.entries_frame = self.view._make_entries(self.view.date)
+            top.destroy()
+        elif check_if_exists:
+            self.view.popup_window("Alert", "Category already exists.")
+        elif not cat_type:
+            self.view.popup_window("Alert", "Please select a category type.")
+        elif not name:
+            self.view.popup_window("Alert", "Please enter a category name.")
+        else:
+            self.view.popup_window("Alert", "Error creating new category.")
 
 
 if __name__ == '__main__':
