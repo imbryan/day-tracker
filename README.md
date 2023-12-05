@@ -17,10 +17,9 @@ Navigate to this project's directory and run **python controller.py** to execute
 
 ### To-do
  * Web sync
- * Button to load backups
+ * Load backups feature
  * Generate graphs for given time spans (Web version only)
- * Make a streamlined executable that doesn't require convoluted instructions
- * Make it easier to jump to non-adjacent days
+ * Jump-to-date feature
 
 ## Known issues
  * Descriptions are currently unavailable
