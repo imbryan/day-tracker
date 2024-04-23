@@ -228,21 +228,50 @@ class View(tk.Tk):
         # Clear frame
         for widget in frame.winfo_children():
             widget.destroy()
+        frame.pack(side="top", fill="x", pady=(self.PAD,self.PAD))
         # Get enabled categories
         categories = self.session.query(model.Category).filter_by(enabled=True).all()
-        for category in categories:
-            category_frame = ttk.Frame(frame)
-            category_frame.category_id = category.id
-            category_frame.entry_text_var = tk.StringVar()
+        for row, category in enumerate(categories):
+            # category_frame = ttk.Frame(frame)
+            # category_frame.category_id = category.id
+            # category_frame.category_type = category.type
+            # category_frame.entry_text_var = tk.StringVar()
             temp_caption_var = "Disable"
 
-            category_label_var = ttk.Label(category_frame, text=category.name, width=20, justify="center")
-            category_label_var.pack(side="left", expand=True)
-            category_frame.label_var = category_label_var
+            category_label_var = ttk.Label(frame, text=category.name)
+            category_label_var.category_id = category.id
+            category_label_var.grid(row=row, column=0, pady=self.PAD/2, sticky="e")
+            # category_label_var.pack(side="left", expand=True)
+            # category_frame.label_var = category_label_var
 
-            category_entry_var = ttk.Entry(category_frame, textvariable=category_frame.entry_text_var)
-            category_entry_var.pack(side="left", expand=True, padx=(0, self.PAD/5))
-            category_frame.entry_var = category_entry_var
+            category_entry_textvariable = tk.StringVar()
+            category_entry_var = ttk.Entry(frame, textvariable=category_entry_textvariable)
+            category_entry_var.category_id = category.id
+            category_entry_var.textvariable = category_entry_textvariable
+            category_entry_var.grid(row=row, column=1, padx=(self.PAD, self.PAD/2), pady=self.PAD/2, sticky="nsew")
+            # category_entry_var.pack(side="left", expand=True, padx=(0, self.PAD/5))
+            # category_frame.entry_var = category_entry_var
+
+            if category.type == 'float':
+                delta_button_frame = tk.Frame(frame)
+                delta_button_frame.grid(row=row, column=2, pady=self.PAD/2, sticky="w")
+
+                decrement_button_var = ttk.Button(delta_button_frame, text="-", command=
+                    (lambda cat_id=category.id: self.controller.delta_one_cat_value(cat_id, 'decrement')),
+                    width=3)
+                decrement_button_var.category_id = category.id
+                decrement_button_var.pack(side='left', padx=(0, self.PAD/5))
+                # decrement_button_var.grid(row=row, column=2, pady=self.PAD/2)
+
+                increment_button_var = ttk.Button(delta_button_frame, text="+", command=
+                    (lambda cat_id=category.id: self.controller.delta_one_cat_value(cat_id, 'increment')),  # NOTE this is correct lambda usage for buttons
+                    width=3)
+                increment_button_var.category_id = category.id
+                increment_button_var.pack(side='right')
+                # increment_button_var.grid(row=row, column=3, pady=self.PAD/2)                      
+                # increment_button_var.pack()
+
+        frame.grid_columnconfigure((0,1,2), weight=1)
 
             # ! I Give Up, Gonna Try Something Else.
             # category_disable_button = ttk.Button(category_frame, text=temp_caption_var,command=
@@ -250,7 +279,8 @@ class View(tk.Tk):
             # category_disable_button.pack(side="left", expand=True, padx=(self.PAD/5, 0))
             ####
 
-            category_frame.pack(side="top", pady=(0,self.PAD/2))
+            # category_frame.pack(side="top", fill="x", pady=(0,self.PAD/2))
+            # category_frame.grid(row=row)
             
         # ! Below is deprecated - UI Refresh
         # top_frame = ttk.Frame(frame)
@@ -302,9 +332,8 @@ class View(tk.Tk):
         ####################
         
 
-        frame.pack(side="top", pady=(self.PAD,self.PAD))
         for widget in frame.winfo_children():
-            if isinstance(widget, ttk.Frame) == False:
+            if isinstance(widget, ttk.Entry) == False:
                 continue
             entry_for_current_date = self.session.query(model.Entry).filter(
                 model.Entry.year==current_date.year,
@@ -313,7 +342,7 @@ class View(tk.Tk):
                 model.Entry.category_id==widget.category_id
             ).first()
             if entry_for_current_date:
-                widget.entry_text_var.set(entry_for_current_date.data)
+                widget.textvariable.set(entry_for_current_date.data)
         return frame
 
     # Extras buttons
