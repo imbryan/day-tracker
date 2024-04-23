@@ -6,8 +6,8 @@ This is a desktop program designed to help you track daily statistics.
  * Some Python packages (see "**requirements.txt**") 
 
  ## How to Run
- * Navigate to this project's root directory. If it is your first time running this program, you will have to run **pip install -r requirements.txt**.
- * Run **python controller.py** to run this program.
+ * Navigate to this project's root directory. If it is your first time running this program, you will have to run "**pip install -r requirements.txt**".
+ * Run "**python controller.py**" to run this program.
    * Note: if your Python installation recognizes .py files, you can simply create a shortcut for **controller.py**, put it wherever you'd like, and run it like that.
 
 ## Features
