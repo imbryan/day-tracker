@@ -13,7 +13,7 @@ This is a desktop program designed to help you track daily statistics.
 ## Features
 ### Current
  * Each "Category" has an "Entry" for any given day.
-   * An "Entry" can currently be a number, text, or time.
+   * Each "Entry" has a value; currently supported values are numbers, text, and times.
  * Ability to set runtime reminders for filling out certain category entries
  * Ability to create backups
    * Note: at the moment, backup loading must be performed manually. Day Tracker uses the database file called "**tracker.db**" located in the root project directory. You can substitute any backup as long as you rename it to "tracker.db".
