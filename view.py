@@ -240,7 +240,7 @@ class View(tk.Tk):
 
             category_label_var = ttk.Label(frame, text=category.name)
             category_label_var.category_id = category.id
-            category_label_var.grid(row=row, column=0, pady=self.PAD/2, sticky="e")
+            category_label_var.grid(row=row, column=0, pady=self.PAD/4, sticky="e")
             # category_label_var.pack(side="left", expand=True)
             # category_frame.label_var = category_label_var
 
@@ -248,13 +248,13 @@ class View(tk.Tk):
             category_entry_var = ttk.Entry(frame, textvariable=category_entry_textvariable)
             category_entry_var.category_id = category.id
             category_entry_var.textvariable = category_entry_textvariable
-            category_entry_var.grid(row=row, column=1, padx=(self.PAD, self.PAD/2), pady=self.PAD/2, sticky="nsew")
+            category_entry_var.grid(row=row, column=1, padx=(self.PAD, self.PAD/2), pady=self.PAD/4, sticky="nsew")
             # category_entry_var.pack(side="left", expand=True, padx=(0, self.PAD/5))
             # category_frame.entry_var = category_entry_var
 
             if category.type == 'float':
                 delta_button_frame = tk.Frame(frame)
-                delta_button_frame.grid(row=row, column=2, pady=self.PAD/2, sticky="w")
+                delta_button_frame.grid(row=row, column=2, pady=self.PAD/4, sticky="w")
 
                 decrement_button_var = ttk.Button(delta_button_frame, text="-", command=
                     (lambda cat_id=category.id: self.controller.delta_one_cat_value(cat_id, 'decrement')),
