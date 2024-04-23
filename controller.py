@@ -472,6 +472,7 @@ class Controller:
     def delta_one_cat_value(self, cat_id, mode):
         category = self.session.query(model.Category).filter_by(id=cat_id).first()
         current_val = self.get_value(category.name, self.view.date)
+        current_val = current_val or '0'  # Check for None
         if current_val.lstrip("-").isdecimal():
             current_val = int(current_val)
         else:
