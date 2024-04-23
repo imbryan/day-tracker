@@ -9,6 +9,7 @@ from setup import add_missing_columns_from_sqlalchemy_migration, add_missing_col
 from shutil import copyfile
 from sqlalchemy import or_
 from sqlalchemy.orm import load_only
+from tkinter.ttk import Entry as TtkEntry
 
 
 class Controller:
@@ -164,8 +165,8 @@ class Controller:
                 self.view.popup_window("Alert", f"Category description has been set to\n\"{self.view.des_var.get()}\"")
         elif caption == "Save All":
             for widget in self.view.entries_frame.winfo_children():
-                if getattr(widget, 'category_id', None):
-                    self.set_cat_value(widget.category_id, self.view.date, widget.entry_text_var.get())
+                if getattr(widget, 'category_id', None) and isinstance(widget, TtkEntry):
+                    self.set_cat_value(widget.category_id, self.view.date, widget.textvariable.get())
             self.view.popup_window("Success", "All entries have been updated.")
 
     def toggle_cat(self):
@@ -320,6 +321,7 @@ class Controller:
         #     self.view.popup_window("Entries for this day", message)
 
     # Get value for a category
+    # NOTE cat = Category.name
     def get_value(self, cat, date):
         # data = self.db.read_database(self.db.conn, "data", "Entries", f"WHERE category_name = \"{cat}\" and year = {date.year} and month = {date.month} and day = {date.day}", "string", "one")  # ! Deprecated
         entry = self.session.query(model.Entry)\
@@ -432,7 +434,7 @@ class Controller:
             'Time': 'time'
         }
         cat_type = type_dict.get(self.view.new_cat_type_var.get())
-        if name and cat_type and (check_if_exists == None):
+        if name and cat_type and (check_if_exists == None) and name.isnumeric() == False:
             category = model.Category(name=name, type=cat_type)
             self.session.add(category)
             self.session.commit()
@@ -445,6 +447,8 @@ class Controller:
             self.view.popup_window("Alert", "Please select a category type.")
         elif not name:
             self.view.popup_window("Alert", "Please enter a category name.")
+        elif name.isnumeric():
+            self.view.popup_window("Alert", "Category names cannot be numeric.")  # Guardrail for cat_id_or_name 
         else:
             self.view.popup_window("Alert", "Error creating new category.")
 
@@ -464,6 +468,20 @@ class Controller:
             top.destroy()
         else:
             self.view.popup_window("Alert", "Please enter a valid category name.")
+
+    def delta_one_cat_value(self, cat_id, mode):
+        category = self.session.query(model.Category).filter_by(id=cat_id).first()
+        current_val = self.get_value(category.name, self.view.date)
+        if current_val.lstrip("-").isdecimal():
+            current_val = int(current_val)
+        else:
+            current_val = float(current_val)
+        if mode == 'increment':
+            current_val += 1
+        elif mode == 'decrement':
+            current_val -= 1
+        self.set_cat_value(cat_id, self.view.date, current_val)
+        self.view.entries_frame = self.view._make_entries(self.view.date)
 
 
 

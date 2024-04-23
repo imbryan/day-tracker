@@ -1,11 +1,13 @@
 # Day Tracker
 This is a desktop program designed to help you track daily statistics. 
 
-Navigate to this project's directory and run **python controller.py** to execute this program.
-
 ## Requirements
- * **Python 3** (developed on 3.9.4)
- * Some packages (run **pip install -r requirements.txt**) 
+ * **Python 3** (developed on 3.12.2)
+ * Some Python packages (run **pip install -r requirements.txt**) 
+
+ ## How to Run
+ * Navigate to this project's root directory and run **python controller.py** to run this program.
+   * Note: if your Python installation recognizes .py files, you can simply create a shortcut for **controller.py** and run it like that.
 
 ## Features
 ### Current
@@ -13,12 +15,11 @@ Navigate to this project's directory and run **python controller.py** to execute
    * An "Entry" can currently be a number, text, or time.
  * Ability to set runtime reminders for filling out certain category entries
  * Ability to create backups
-   * Note: loading a backup is currently done manually by moving it to the project directory and naming it "tracker.db"
+   * Note: at the moment, backup loading must be performed manually. Day Tracker uses the database file called **tracker.db** located in the root project directory. You can substitute any backup as long as you rename it to "tracker.db".
 
 ### To-do
- * Web sync
- * Load backups feature
- * Generate graphs for given time spans (Web version only)
+ * Load backup feature
+ * Generate graphs for given time spans (Web interface)
  * Jump-to-date feature
 
 ## Known issues
