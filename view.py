@@ -106,6 +106,9 @@ class View(tk.Tk):
 
         backup_entry = ttk.Entry(top, textvariable=self.backup_var)
         backup_entry.pack(expand=True, side="left")
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y-%m-%d")
+        self.backup_var.set(formatted_date)
 
         backup_button = ttk.Button(top, text="Backup", command=lambda: self.controller.backup(top))
         backup_button.pack(expand=True, side="left")
