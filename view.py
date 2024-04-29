@@ -270,6 +270,15 @@ class View(tk.Tk):
                 increment_button_var.pack(side='right')
                 # increment_button_var.grid(row=row, column=3, pady=self.PAD/2)                      
                 # increment_button_var.pack()
+            elif category.type == 'time':
+                now_button_frame = tk.Frame(frame)
+                now_button_frame.grid(row=row, column=2, pady=self.PAD/4, sticky="w")
+
+                now_button_var = ttk.Button(now_button_frame, text="Now", command=
+                    (lambda cat_id=category.id: self.controller.current_time_cat_value(cat_id)),
+                    width=8)
+                now_button_var.category_id = category.id
+                now_button_var.pack(side='right')
 
         frame.grid_columnconfigure((0,1,2), weight=1)
 
