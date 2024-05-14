@@ -24,6 +24,7 @@ This is a desktop program designed to help you track daily statistics.
  * Jump-to-date feature
 
 ## Known issues
+ * "Now" button truncates leading zeros 
  * Descriptions are currently unavailable
  * Math functions are currently unavailable
  * Float values throw an exception when being read
