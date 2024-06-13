@@ -472,6 +472,7 @@ class Controller:
     def delta_one_cat_value(self, cat_id, mode):
         category = self.session.query(model.Category).filter_by(id=cat_id).first()
         current_val = self.get_value(category.name, self.view.date)
+        was_none = True if current_val in ('', None) else False
         current_val = current_val or '0'  # Check for None
         if current_val.lstrip("-").isdecimal():
             current_val = int(current_val)
@@ -480,7 +481,10 @@ class Controller:
         if mode == 'increment':
             current_val += 1
         elif mode == 'decrement':
-            current_val -= 1
+            if was_none:
+                current_val = 0
+            else:
+                current_val -= 1
         self.set_cat_value(cat_id, self.view.date, current_val)
         self.view.entries_frame = self.view._make_entries(self.view.date)
 
