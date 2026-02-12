@@ -5,7 +5,7 @@ This is a desktop program designed to help you track daily statistics.
  * **Python 3** (developed on 3.12.2)
  * Some Python packages (see "**requirements.txt**") 
 
- ## How to Run
+## How to Run
  Navigate to this project's root directory. If it is your first time running this program, you will have to run:
  ```
  pip install -r requirements.txt
@@ -30,7 +30,6 @@ python controller.py
  * Jump-to-date feature
 
 ## Known issues
- * "Now" button truncates leading zeros 
  * Descriptions are currently unavailable
  * Math functions are currently unavailable
  * Float values throw an exception when being read

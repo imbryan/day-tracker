@@ -491,7 +491,7 @@ class Controller:
 
     def current_time_cat_value(self, cat_id):
         current_time = datetime.now()
-        formatted_time = f'{current_time.hour}:{current_time.minute}'
+        formatted_time = f'{current_time.hour}:{current_time.minute:02}'
         self.set_cat_value(cat_id, self.view.date, formatted_time)
         self.view.entries_frame = self.view._make_entries(self.view.date)
 
