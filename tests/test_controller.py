@@ -7,14 +7,17 @@ class ControllerTestCase(TestCase):
     def setUp(self):
         self.mock_session = mock.patch('controller.session', mock.MagicMock())
         self.mock_db_name = mock.patch('controller.DB_FILENAME', 'test.db')
+        self.mock_view = mock.patch('controller.View', mock.MagicMock())
         self.mock_session.start()
         self.mock_db_name.start()
+        self.mock_view.start()
 
         self.controller = Controller()
 
     def tearDown(self):
         self.mock_session.stop()
         self.mock_db_name.stop()
+        self.mock_view.stop()
 
     def test_current_time_cat_value(self):
         from datetime import datetime
