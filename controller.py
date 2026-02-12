@@ -4,6 +4,10 @@ from dateutil import relativedelta
 import time
 from shutil import copyfile
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 from sqlalchemy import or_
 from sqlalchemy.orm import load_only
 from tkinter.ttk import Entry as TtkEntry
@@ -60,6 +64,11 @@ class Controller:
 
     def main(self):
         self.view.main()
+
+    def final_exit(self):
+        plt.close('all')
+        self.view.quit()
+        self.view.destroy()
 
     # Buttons for navigating dates
     def on_nav_button_click(self, caption):
@@ -204,6 +213,80 @@ class Controller:
                           "This program lets you browse your entries across days.\n\n"
                           "Repository\thttps://github.com/imbryan/day-tracker"
                                    )
+        elif caption=="Graph (month)":
+            cat_name = View.input_window("Graph", "Which category would you like to graph?")
+            if not cat_name:
+                return
+            q = (
+                self.session.query(
+                    model.Entry.year,
+                    model.Entry.month,
+                    model.Entry.day,
+                    model.Entry.data,
+                    model.Category.type,
+                )
+                .join(model.Category)
+                .filter(
+                    model.Category.name == cat_name.lower(),
+                    model.Entry.year == self.view.date.year,
+                    model.Entry.month == self.view.date.month
+                )
+                .order_by(model.Entry.day)
+            )
+            with self.session.get_bind().connect() as conn:
+                df = pd.read_sql(q.statement, conn)
+
+            if df.empty:
+                self.view.popup_window("Error", "There is no data available for this month.")
+                return
+
+            df['data'] = df['data'].replace('', np.nan)
+            df = df.dropna(subset=['data'])
+
+            datatype = df['type'].iloc[0]
+
+            if datatype == 'float':
+                df['y'] = pd.to_numeric(df['data'])
+            elif datatype == 'time':
+                time_parts = df['data'].str.split(':', expand=True).astype(float)
+                df['y'] = time_parts[0] + (time_parts[1] / 60)
+            else:
+                return
+
+            from matplotlib import ticker
+            from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+            from tkinter import Toplevel
+
+            # Make a window for the graph
+            graph_window = Toplevel(self.view)
+            graph_window.title(f"Trend Analysis - {cat_name}")
+            graph_window.geometry("800x600")
+
+            sns.set_theme(style="whitegrid")
+            fig = plt.Figure(figsize=(8, 6), dpi=100)
+            ax = fig.add_subplot(111)
+
+            sns.lineplot(data=df, x='day', y='y', marker='o', ax=ax)
+            ax.set_title(f"{cat_name} values for {self.view.date.year}-{self.view.date.month:02}")
+            ax.set(xlabel="Day")
+            ax.set(ylabel=None)
+
+            # Show days 1-31 on tickers
+            ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+            plt.xlim(1, 31)
+            if datatype == 'time':
+                ax.yaxis.set_major_formatter(ticker.FuncFormatter(
+                    lambda x, pos: f'{int(x):02d}:{int((x%1)*60):02d}'
+                ))
+
+            # Recalculate margins
+            fig.tight_layout()
+
+            # Draw the graph
+            canvas = FigureCanvasTkAgg(fig, master=graph_window)
+            canvas.draw()
+            canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
+
         elif caption=="Sum (month)":
             if self.view.cat_var.get() != '':  # if there is valid input
                 try:
@@ -214,7 +297,7 @@ class Controller:
                             model.Category.name==self.view.cat_var.get().lower(),
                             model.Entry.year==self.view.date.year, 
                             model.Entry.month==self.view.date.month
-                        ).options(load_only('data')).all()
+                        ).options(load_only(model.Entry.data)).all()
 
                     sum = 0
                     for entry in data_set:
@@ -231,7 +314,7 @@ class Controller:
                         .filter(
                             model.Category.name==self.view.cat_var.get().lower(),
                             model.Entry.year==self.view.date.year
-                        ).options(load_only('data')).all()
+                        ).options(load_only(model.Entry.data)).all()
                     sum = 0
                     for entry in data_set:
                         sum+=int(getattr(entry, 'data', 0))
@@ -249,7 +332,7 @@ class Controller:
                             model.Category.name==self.view.cat_var.get().lower(),
                             model.Entry.year==self.view.date.year, 
                             model.Entry.month==self.view.date.month
-                        ).options(load_only('data')).all()
+                        ).options(load_only(model.Entry.data)).all()
                     sum = 0
                     use_date = self.view.date
                     if datetime.now().date() > use_date.date():
@@ -275,7 +358,7 @@ class Controller:
                         .filter(
                             model.Category.name==self.view.cat_var.get().lower(),
                             model.Entry.year==self.view.date.year
-                        ).options(load_only('data')).all()
+                        ).options(load_only(model.Entry.data)).all()
 
                     sum = 0
                     use_date = self.view.date
@@ -316,7 +399,7 @@ class Controller:
         elif caption == "All Categories":
             message = ''
             # cats = self.db.read_database(self.db.conn, "name", "Categories", None, "string", "all")  # ! Deprecated
-            cats = self.session.query(model.Category).options(load_only('name')).all()
+            cats = self.session.query(model.Category).options(load_only(model.Category.name)).all()
             for cat in cats:
                 message+=f'{cat.name}\n'
 
@@ -343,7 +426,7 @@ class Controller:
                 model.Entry.year==date.year,
                 model.Entry.month==date.month, 
                 model.Entry.day==date.day,
-            ).options(load_only('data'))
+            ).options(load_only(model.Entry.data))
         entry = entry.first()
         if entry:
             return entry.data
@@ -399,7 +482,7 @@ class Controller:
     def get_reminder_status(self, cat):
         # data = self.db.read_database(self.db.conn, "id", "Reminders", f"WHERE category_name = \"{cat}\"", "int", "one")  # ! Deprecated
         reminder = self.session.query(model.Reminder).join(model.Category, model.Category.id==model.Reminder.category_id)\
-            .filter(model.Category.name==cat).options(load_only('id')).first()
+            .filter(model.Category.name==cat).options(load_only(model.Reminder.id)).first()
         if reminder:
             return True
         return None
@@ -407,7 +490,7 @@ class Controller:
     # Get description from db
     def get_description(self, cat):
         # data = self.db.read_database(self.db.conn, "description", "Categories", f"WHERE name = \"{cat}\"", "string", "one")  # ! Deprecated
-        category = self.session.query(model.Category).filter_by(name=cat).options(load_only('description')).first()
+        category = self.session.query(model.Category).filter_by(name=cat).options(load_only(model.Category.description)).first()
         if category:
             return category.description
         return ''

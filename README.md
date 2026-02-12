@@ -23,14 +23,13 @@ python controller.py
  * Ability to set runtime reminders for filling out certain category entries
  * Ability to create backups
 > Note: at the moment, backup loading must be performed manually. Day Tracker uses the database file called "**tracker.db**" located in the root project directory. You can substitute any backup as long as you rename it to "tracker.db".
+ * Trend graphs
 
 ### To-do
  * Load backup feature
- * Generate graphs for given time spans (Web interface)
  * Jump-to-date feature
 
 ## Known issues
  * Descriptions are currently unavailable
  * Math functions are currently unavailable
  * Float values throw an exception when being read
- * Terminal runs behind GUI

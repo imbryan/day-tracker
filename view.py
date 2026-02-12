@@ -41,6 +41,9 @@ class View(tk.Tk):
         self.entries_frame = self._make_entries(self.date)
         self._make_extras()
 
+        # Set exit protocol
+        self.protocol("WM_DELETE_WINDOW", self.controller.final_exit)
+
         self.remind(self.reminders)
 
     def main(self):
@@ -432,8 +435,14 @@ class View(tk.Tk):
         # (lambda button=caption_average_year: self.controller.message_button_click(caption_average_year)))
         # average_year_button.pack(side="left", expand=True)
         ### end 
-
-
+        
+        caption_graph_month = 'Graph (month)'
+        graph_month_button = ttk.Button(
+            middle_frame,
+            text=caption_graph_month,
+            command=(lambda button=caption_graph_month: self.controller.message_button_click(caption_graph_month))
+        )
+        graph_month_button.pack(side='left', expand=True)
 
         # Bottom frame widgets
         caption_help = "Help"
@@ -447,7 +456,7 @@ class View(tk.Tk):
         backup_button.pack(side="left", expand=True, padx=(0,self.PAD/2))
 
         caption_exit = "Exit"
-        exit_button = ttk.Button(bottom_frame, text=caption_exit, command=self.destroy)
+        exit_button = ttk.Button(bottom_frame, text=caption_exit, command=self.controller.final_exit)
         exit_button.pack(side="left", expand=True)
 
         # Reminder Toggle  # ! Deprecated -- UI Refresh
