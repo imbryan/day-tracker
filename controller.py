@@ -1,15 +1,17 @@
 import os
-import model
 from datetime import datetime, timedelta
 from dateutil import relativedelta
 import time
-from view import View
-from database import session, DB_FILENAME
-from setup import add_missing_columns_from_sqlalchemy_migration, add_missing_columns_from_updates, populate_reminders_category_ids, populate_entries_category_ids
 from shutil import copyfile
+
 from sqlalchemy import or_
 from sqlalchemy.orm import load_only
 from tkinter.ttk import Entry as TtkEntry
+
+from database import session, DB_FILENAME
+import model
+import setup
+from view import View
 
 
 class Controller:
@@ -23,25 +25,35 @@ class Controller:
             # Checking for SQLAlchemy Migration changes
             self.session.query(model.Reminder).filter(model.Reminder.category_id==1).all()
             self.session.query(model.Entry).filter(model.Entry.category_id==1).all()
-            
+
         except:
             print('Complying with SQLAlchemy Migration changes')
-            add_missing_columns_from_sqlalchemy_migration(self.session)
+            setup.add_missing_columns_from_sqlalchemy_migration(self.session)
         try:
             # Checking for update changes
             self.session.query(model.Category).filter(model.Category.enabled==True).first()
         except:
             print('Complying with update changes')
-            add_missing_columns_from_updates(self.session)
+            setup.add_missing_columns_from_updates(self.session)
         # Checking for NULL category_id fields
         check_reminders = self.session.query(model.Reminder).filter(model.Reminder.category_id==None).all()
         if check_reminders:
             print(f'{len(check_reminders)} legacy reminders detected')
-            populate_reminders_category_ids(self.session, check_reminders)
+            setup.populate_reminders_category_ids(self.session, check_reminders)
         check_entries = self.session.query(model.Entry).filter(model.Entry.category_id==None).all()
         if check_entries:
             print(f'{len(check_entries)} legacy entries detected')
-            populate_entries_category_ids(self.session, check_entries)
+            setup.populate_entries_category_ids(self.session, check_entries)
+        # Checking for malformed times
+        check_malformed_times = (
+            self.session.query(model.Entry)
+            .join(model.Category)
+            .filter(model.Category.type=='time', model.Entry.data.like('%:_'))
+            .all()
+        )
+        if check_malformed_times:
+            print(f'{len(check_malformed_times)} malformed times detected')
+            setup.fix_malformed_times(self.session, check_malformed_times)
         ### passed all checks ###
 
         self.view = View(self, self.session)

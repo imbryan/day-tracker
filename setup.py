@@ -55,3 +55,11 @@ def populate_entries_category_ids(session, entries):
             print(f'Could not update entry (category "{entry.category_name}" not found)')
     session.commit()
     print(f'{count} entries fixed')
+
+
+def fix_malformed_times(session, entries):
+    for entry in entries:
+        h, m = entry.data.split(':')
+        entry.data = f"{h}:{int(m):02}"
+    session.commit()
+    print(f'{len(entries)} entries fixed')
