@@ -31,6 +31,8 @@ class View(tk.Tk):
         self.val_var = tk.StringVar()
         self.des_var = tk.StringVar()
 
+        self.graph_var = tk.StringVar()
+
         self.backup_var = tk.StringVar()
 
         self.reminders = self.controller.check_reminders()
@@ -479,8 +481,8 @@ class View(tk.Tk):
         showinfo(title, message)
 
     @staticmethod
-    def input_window(title, message):
-        return askstring(title, message)
+    def input_window(title, message, initial=''):
+        return askstring(title, message, initialvalue=initial)
 
     def delete_cat(self):
         cat = self.cat_var.get().lower()

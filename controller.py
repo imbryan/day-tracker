@@ -214,9 +214,15 @@ class Controller:
                           "Repository\thttps://github.com/imbryan/day-tracker"
                                    )
         elif caption=="Graph (month)":
-            cat_name = View.input_window("Graph", "Which category would you like to graph?")
+            cat_name = View.input_window(
+                "Graph",
+                "Which category would you like to graph?",
+                initial=self.view.graph_var.get()
+            )
             if not cat_name:
                 return
+            # Cache input for QoL
+            self.view.graph_var.set(cat_name)
             q = (
                 self.session.query(
                     model.Entry.year,
